@@ -59,12 +59,24 @@ Used only for:
 * Feature implementation
 * Data display
 
-### 4.2 Storage Duration
+### 4.2 Public Data and Training Use (Enabled by Default)
+
+Your player scores, Rating, trends, and similar data will be **anonymized/desensitized** and treated as public data. Such data may be used for data analysis, model training, and similar purposes. This feature is **enabled by default**.
+
+If you do not want to share this information, send the following command to the bot:
+
+```
+不同意共享我的数据
+```
+
+to disable this feature. After disabling, we will no longer use your related data as public data for the purposes described above.
+
+### 4.3 Storage Duration
 
 * Binding data is retained for **12 months**
 * Data is deleted after user unbinds (unless otherwise required by law)
 
-### 4.3 Data Security
+### 4.4 Data Security
 
 We will take reasonable security measures as required by the laws of the People's Republic of China, but cannot completely avoid network risks.
 
