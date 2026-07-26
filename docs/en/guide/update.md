@@ -2,6 +2,16 @@
 
 ## July 2026
 
+### 2026/07/26
+<Badge type="tip" text="New Feature" />
+
+- **Rank course image** — added PRiSM PLUS rank course reports with `段位表 真二段` / `真二段段位表`; supports `@user` for personal score state
+- **Rank course samples** — the image shows LIFE rules, track level/constant, personal best achievement, anonymous sample count, average, median, P25-P75 distribution, and SSS rate
+
+<Badge type="warning" text="Optimization" />
+
+- Rank course images use the player's nameplate and official dani Plate assets; the footer identifies live/bundled sample sources and notes that arcade results are authoritative
+
 ### 2026/07/20
 AWMC Version `V26.8.7` [AWMC V2]
 

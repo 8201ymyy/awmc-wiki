@@ -174,11 +174,17 @@ Prefix difficulty before song name, e.g. `白潘排名`.
 | `<plate>进度` | Plate progress |
 | `<level><achievement>进度` | Level progress, e.g. `13+sss进度` |
 | `<level><plate>进度` | e.g. `13将进度`, `14+极进度` |
+| `段位表 [rank]` | Rank course image; defaults to PRiSM PLUS, e.g. `段位表 真二段`; supports @ target |
+| `<rank>段位表` | Reverse form, e.g. `真二段段位表` |
 | `我要上<score>分` | Score-push recommendations |
 | `我要在<level>上<score>分` | Level-specific recommendations |
 | `<level>分数列表` | Score list for level |
 
 Achievements: `ap` `fc` `fcp` `fs` `fsp` `ss` `sss` `sync`, etc.
+
+::: tip Rank course samples
+The rank course image includes LIFE rules, course track level/constant, personal best achievement, anonymous sample count, average, median, P25-P75 distribution, and SSS rate. Samples are aggregated from recent server-side full-score caches for users who have not opted out of data sharing; low-sample, cold-start, or aggregation-failure cases fall back to bundled samples. The footer identifies the data source, and official arcade results remain authoritative.
+:::
 
 ### 2.6 Song Guessing
 

@@ -130,7 +130,20 @@ Enter the corresponding number (1-13), or enter `00` to cancel.
 
 For song-related types, the Bot will further prompt for the Song ID.
 
-### 5.5 Others
+### 5.5 Rank Course
+
+The current default course table is **CN PRiSM PLUS**. The output image includes LIFE rules, the four course tracks, song level/constant, your personal best achievement, and anonymous server-side sample statistics.
+
+| Command | Description |
+|---------|-------------|
+| `/段位表` | Show supported rank names and examples. |
+| `/段位表 <rank>` | Query a rank course, e.g. `/段位表 真二段`. |
+| `/<rank>段位表` | Reverse form, e.g. `/真二段段位表`. |
+| `/段位表 <rank> @user` | Render the target user's personal score state when available. |
+
+Rank resources prefer the player's current nameplate and official dani Plate. Anonymous samples come from recent server-side full-score caches for users who have not opted out of data sharing; low-sample or cold-start charts fall back to bundled samples. The footer identifies the data source and notes that arcade results remain authoritative.
+
+### 5.6 Others
 
 | Command | Description |
 |---------|-------------|
