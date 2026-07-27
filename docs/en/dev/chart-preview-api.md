@@ -1,4 +1,5 @@
 ---
+apiBaseUrl: https://v.wmc.pub
 chartPreviewApiBaseUrl: https://v.wmc.pub
 ---
 
