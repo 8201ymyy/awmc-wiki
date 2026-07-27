@@ -51,6 +51,15 @@ chartPreviewBaseUrl: https://v.awmc.cc
 - **鉴权方式**：<Badge type="tip" text="无需鉴权" /> (公开访问)
 - **详细文档**：[点击查看谱面预览说明](/dev/chart-preview)
 
+## 📊 谱面评价与分析 API (基准地址: `https://v.wmc.pub/api/v1/`)
+
+::: info 💡 REST API
+谱面预览平台的公开 REST API，支持谱面查询、评论、评分、成绩提交、排行榜等功能。需要 API Key 鉴权。
+:::
+
+- **鉴权方式**：<Badge type="warning" text="Bearer API Key" /> (需在 Authorization 中携带)
+- **详细文档**：[点击查看谱面评价与分析 API 详情](/dev/chart-preview-api)
+
 ## 🚀 快速上手
 
 你可以通过以下链接快速访问不同模块的开发文档：
@@ -59,6 +68,7 @@ chartPreviewBaseUrl: https://v.awmc.cc
 - [**AWMC 公共 API**](/dev/awmc-api) - 用户查询、发票充值队列、成绩上传（水鱼 / 落雪）。
 - [**Assets 静态资源 API**](/dev/assets-api) - 曲绘、资源图库等静态文件获取。
 - [**谱面预览**](/dev/chart-preview) - 浏览器内谱面预览与 Query 参数说明。
+- [**谱面评价与分析 API**](/dev/chart-preview-api) - 谱面查询、评论、评分、成绩提交与排行榜 REST API。
 - [**更多功能**] - 正在开发中，敬请期待...
 
 ::: tip 建议

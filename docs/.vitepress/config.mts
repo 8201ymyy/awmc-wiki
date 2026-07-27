@@ -112,7 +112,8 @@ export default defineConfig({
             {
               text: '🎵 谱面预览',
               items: [
-                { text: '谱面预览', link: '/dev/chart-preview' }
+                { text: '谱面预览', link: '/dev/chart-preview' },
+                { text: '谱面评价与分析 API', link: '/dev/chart-preview-api' }
               ]
             }
           ]
@@ -183,7 +184,8 @@ export default defineConfig({
             {
               text: '🎵 Chart Preview',
               items: [
-                { text: 'Chart Preview', link: '/en/dev/chart-preview' }
+                { text: 'Chart Preview', link: '/en/dev/chart-preview' },
+                { text: 'Chart Review & Analysis API', link: '/en/dev/chart-preview-api' }
               ]
             }
           ]

@@ -51,6 +51,15 @@ Preview maimai charts in the browser. Parameters correspond to Lxns song IDs, ch
 - **Authentication**: <Badge type="tip" text="No Auth Required" /> (Public access)
 - **Documentation**: [View Chart Preview Details](/en/dev/chart-preview)
 
+## Chart Review & Analysis API (Base URL: `https://v.wmc.pub/api/v1/`)
+
+::: info REST API
+Public REST API for the Chart Preview platform, supporting chart queries, comments, ratings, score submissions, rankings, and more. Requires API Key authentication.
+:::
+
+- **Authentication**: <Badge type="warning" text="Bearer API Key" /> (Must be included in Authorization header)
+- **Documentation**: [View Chart Review & Analysis API Details](/en/dev/chart-preview-api)
+
 ## Quick Start
 
 You can quickly access different module documentation via the following links:
@@ -59,6 +68,7 @@ You can quickly access different module documentation via the following links:
 - [**AWMC Public API**](/en/dev/awmc-api) - User queries, charge queue, score upload (DivingFish / Lxns).
 - [**Assets Static Resource API**](/en/dev/assets-api) - Jacket art, resource gallery, and other static file retrieval.
 - [**Chart Preview**](/en/dev/chart-preview) - In-browser chart preview and query parameter documentation.
+- [**Chart Review & Analysis API**](/en/dev/chart-preview-api) - REST API for chart queries, comments, ratings, score submissions, and rankings.
 - [**More Features**] - Under development, stay tuned...
 
 ::: tip Suggestion
