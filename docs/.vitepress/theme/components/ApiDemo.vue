@@ -78,6 +78,7 @@ const currentApi = computed(() => {
 const paramValues = ref({})
 const isExpanded = ref(false)
 const copySuccess = ref(false)
+const curlCopySuccess = ref(false)
 const isLoading = ref(false)
 const isImageLoading = ref(false)
 const executionResult = ref(null)
@@ -105,6 +106,28 @@ const copyUrl = () => {
   navigator.clipboard.writeText(fullUrl)
   copySuccess.value = true
   setTimeout(() => copySuccess.value = false, 2000)
+}
+
+const copyCurl = () => {
+  const url = getFullUrl()
+  const method = currentApi.value.method || 'GET'
+  let cmd = `curl -X ${method}`
+  if (authToken.value) {
+    cmd += ` -H "Authorization: Bearer ${authToken.value}"`
+  }
+  if (method !== 'GET' && method !== 'HEAD') {
+    const paramsIn = resolveParamsIn()
+    if (paramsIn === 'json') {
+      const body = getJsonBody()
+      if (Object.keys(body).length > 0) {
+        cmd += ` -H "Content-Type: application/json" -d '${JSON.stringify(body)}'`
+      }
+    }
+  }
+  cmd += ` '${url}'`
+  navigator.clipboard.writeText(cmd)
+  curlCopySuccess.value = true
+  setTimeout(() => curlCopySuccess.value = false, 2000)
 }
 
 const resolveParamsIn = () => {
@@ -288,6 +311,9 @@ const formatMethod = (method) => {
             </button>
             <button class="copy-btn" @click.stop="copyUrl">
               {{ copySuccess ? '已复制' : '复制' }}
+            </button>
+            <button class="copy-btn" @click.stop="copyCurl">
+              {{ curlCopySuccess ? '已复制' : '复制 cURL' }}
             </button>
           </div>
         </div>
