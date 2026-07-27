@@ -258,15 +258,15 @@ const formatMethod = (method) => {
           {{ currentApi.description }}
         </div>
 
-        <!-- 鉴权部分 (仅针对 awmc-api 场景) -->
-        <div v-if="currentApi.baseUrl.includes('api.awmc.')" class="auth-section">
+        <!-- 鉴权部分 -->
+        <div v-if="currentApi.baseUrl.includes('api.awmc.') || currentApi.baseUrl.includes('v.wmc.pub')" class="auth-section">
           <div class="section-title">鉴权设置 (Authorization)</div>
           <div class="auth-box">
             <span class="auth-prefix">Bearer</span>
             <input 
               v-model="authToken" 
               class="auth-input"
-              placeholder="请输入您的 gw_ 令牌或 JWT"
+              :placeholder="currentApi.baseUrl.includes('v.wmc.pub') ? '请输入您的 mk_live_ API Key' : '请输入您的 gw_ 令牌或 JWT'"
             />
           </div>
           <div class="auth-tips">填写的令牌将用于此后的所有请求。</div>
