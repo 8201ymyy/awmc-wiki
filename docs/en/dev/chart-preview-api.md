@@ -117,6 +117,87 @@ API Keys are **only displayed once** at creation. If lost, you must create a new
 
 ---
 
+#### 1.3 Get Chart Tags Summary
+
+<ApiDemo
+  :options="[
+    {
+      title: 'Get Chart Tags Summary',
+      method: 'GET',
+      path: '/api/v1/charts/:chartKey/tags',
+      description: 'Returns difficulty classification, radar tags, evaluation tags, regression feature contributions, and detected chart patterns. Designed for Bot / lightweight queries; filters low-score items and sorts by importance.',
+      params: [
+        { name: 'chartKey', type: 'string', required: 'Required', desc: 'Chart Key, format: {songId}:{kind}:{difficulty}', value: '417:standard:5' },
+        { name: 'radar_threshold', type: 'integer', required: 'Optional', desc: 'Minimum radar/eval score threshold, default 40, range 20-60', value: '40' },
+        { name: 'feature_threshold', type: 'float', required: 'Optional', desc: 'Minimum absolute feature contribution threshold, default 0.5, range 0.1-2.0', value: '0.5' }
+      ],
+      response: {
+        chartKey: '417:standard:5',
+        title: 'ウミユリ海底譚',
+        artist: 'n-buna',
+        kind: 'standard',
+        difficulty: 5,
+        levelLabel: 'Standard · MASTER 13',
+        tags: {
+          difficultyClassification: {
+            tag: 'normal',
+            label: 'Normal',
+            estimatedLevel: 13.1,
+            deviation: 0.1
+          },
+          radarTags: [
+            { label: 'Offset', score: 72 },
+            { label: 'Backhand', score: 53 },
+            { label: 'Trill', score: 47 },
+            { label: 'Fixed Beat', score: 45 }
+          ],
+          evaluationTags: [
+            { label: 'High Note Count', score: 94 },
+            { label: 'Stamina', score: 76 },
+            { label: 'Keyboard', score: 57 }
+          ],
+          features: [
+            { label: 'Avg Density', contribution: 11.79, direction: 'up' },
+            { label: 'High Density Penalty', contribution: -1.64, direction: 'down' },
+            { label: 'Slide Ratio', contribution: 1.18, direction: 'up' }
+          ],
+          patterns: [
+            { label: 'Offset Star', count: 3, severity: 'high' },
+            { label: 'Cross-hand', count: 1, severity: 'high' },
+            { label: 'Trill', count: 8, severity: 'mid' },
+            { label: 'Backhand/Large Shift', count: 26, severity: 'mid' }
+          ]
+        }
+      }
+    }
+  ]"
+/>
+
+**Field Descriptions**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| tags.difficultyClassification | object | Difficulty class: tag=normal/water/fake; label=Normal/Inflated/Water |
+| tags.difficultyClassification.estimatedLevel | float | Difficulty value predicted by regression model |
+| tags.difficultyClassification.deviation | float | Deviation from official level (positive=inflated, negative=underrated)|
+| tags.radarTags | array | High-score radar axes, score 0-100 |
+| tags.evaluationTags | array | High-score evaluation axes (Stamina/Endurance/Star/Keyboard/High Note Count)|
+| tags.features | array | Top regression feature contributions; direction=up/down indicates difficulty increase/decrease |
+| tags.features.contribution | float | Feature's contribution to difficulty value (positive=adds, negative=reduces)|
+| tags.patterns | array | Detected chart patterns; severity=high/mid/low |
+| tags.patterns.count | int | Occurrence count of this pattern |
+| tags.patterns.severity | string | high=high intensity (strength≥5), mid=medium, low=low |
+
+**Possible radarTags labels**: Cross-hand, Scatter, Sweep, Finale, Circle, Large Shift, Fixed Beat, Bomb, Burst, Trill, Jump, Offset, One-stroke, Backhand
+
+**Possible evaluationTags labels**: Stamina, Endurance, Star, Keyboard, High Note Count
+
+**Possible features labels**: Avg Density, High Density Penalty, Peak Density, Slide Ratio, Touch Ratio, Cross-hand, Same-position Repeat, Jump Rhythm, One-stroke, Offset, Burst, Circle, Sweep
+
+**Possible patterns labels**: Offset Star, Cross-hand, Trill, Jump, One-stroke, Backhand/Large Shift, Fixed Beat, Finale, Burst, Sweep, Circle, Touch Split, Scatter, Bomb
+
+---
+
 ### 2. Comments
 
 #### 2.1 Get Chart Comments
@@ -453,11 +534,19 @@ curl -H "Authorization: Bearer mk_live_xxx" \
 curl -H "Authorization: Bearer mk_live_xxx" \
   https://v.wmc.pub/api/v1/charts/123:dx:4
 
-# 3. Get comments
+# 3. Get chart tags (for Bot)
+curl -H "Authorization: Bearer mk_live_xxx" \
+  "https://v.wmc.pub/api/v1/charts/417:standard:5/tags"
+
+# 4. Custom thresholds (high-score items only)
+curl -H "Authorization: Bearer mk_live_xxx" \
+  "https://v.wmc.pub/api/v1/charts/417:standard:5/tags?radar_threshold=60&feature_threshold=1.0"
+
+# 5. Get comments
 curl -H "Authorization: Bearer mk_live_xxx" \
   "https://v.wmc.pub/api/v1/charts/123:dx:4/comments"
 
-# 4. Get rankings
+# 6. Get rankings
 curl -H "Authorization: Bearer mk_live_xxx" \
   "https://v.wmc.pub/api/v1/rankings?sort=rating&limit=10"
 ```

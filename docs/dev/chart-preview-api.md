@@ -117,6 +117,87 @@ API Key **仅在创建时显示一次**，丢失需重新创建。
 
 ---
 
+#### 1.3 获取谱面标签摘要
+
+<ApiDemo
+  :options="[
+    {
+      title: '获取谱面标签摘要',
+      method: 'GET',
+      path: '/api/v1/charts/:chartKey/tags',
+      description: '返回谱面的难度分类、雷达轴标签、评估轴标签、回归特征贡献和检测到的谱面模式。适用于 Bot / 轻量查询，过滤低分项并按重要性排序。',
+      params: [
+        { name: 'chartKey', type: 'string', required: '必填', desc: '谱面 Key，格式：{songId}:{kind}:{difficulty}', value: '417:standard:5' },
+        { name: 'radar_threshold', type: 'integer', required: '选填', desc: 'radar/eval score 最低阈值，默认 40，范围 20-60', value: '40' },
+        { name: 'feature_threshold', type: 'float', required: '选填', desc: '特征贡献绝对值最低阈值，默认 0.5，范围 0.1-2.0', value: '0.5' }
+      ],
+      response: {
+        chartKey: '417:standard:5',
+        title: 'ウミユリ海底譚',
+        artist: 'n-buna',
+        kind: 'standard',
+        difficulty: 5,
+        levelLabel: '标准 · MASTER 13',
+        tags: {
+          difficultyClassification: {
+            tag: 'normal',
+            label: '正常谱',
+            estimatedLevel: 13.1,
+            deviation: 0.1
+          },
+          radarTags: [
+            { label: '错位', score: 72 },
+            { label: '反手', score: 53 },
+            { label: '纵连', score: 47 },
+            { label: '定拍', score: 45 }
+          ],
+          evaluationTags: [
+            { label: '高物量', score: 94 },
+            { label: '体力谱', score: 76 },
+            { label: '键盘谱', score: 57 }
+          ],
+          features: [
+            { label: '平均密度', contribution: 11.79, direction: 'up' },
+            { label: '高密度惩罚', contribution: -1.64, direction: 'down' },
+            { label: '滑条占比', contribution: 1.18, direction: 'up' }
+          ],
+          patterns: [
+            { label: '错位星星', count: 3, severity: 'high' },
+            { label: '交互', count: 1, severity: 'high' },
+            { label: '纵连', count: 8, severity: 'mid' },
+            { label: '反手/大位移同押', count: 26, severity: 'mid' }
+          ]
+        }
+      }
+    }
+  ]"
+/>
+
+**字段说明**:
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| tags.difficultyClassification | object | 难度分类：tag=normal/water/fake，label=正常谱/水/虚高谱 |
+| tags.difficultyClassification.estimatedLevel | float | 回归模型预测的难度值 |
+| tags.difficultyClassification.deviation | float | 预测值与官标的偏差（正=虚高，负=偏低）|
+| tags.radarTags | array | 雷达轴高分项，score 0-100 |
+| tags.evaluationTags | array | 评估轴高分项（体力谱/底力谱/星星谱/键盘谱/高物量）|
+| tags.features | array | 回归模型贡献最大的特征，direction=up/down 表示提升/降低难度 |
+| tags.features.contribution | float | 该特征对难度值的贡献量（正=加难度，负=减难度）|
+| tags.patterns | array | 检测到的谱面模式，severity=high/mid/low |
+| tags.patterns.count | int | 该模式出现次数 |
+| tags.patterns.severity | string | high=高强度（strength≥5），mid=中等，low=低 |
+
+**radarTags 可能的 label**：交互、散打、扫键、绝赞段、转圈、大位移、定拍、拆弹、爆发、纵连、跳拍、错位、一笔画、反手
+
+**evaluationTags 可能的 label**：体力谱、底力谱、星星谱、键盘谱、高物量
+
+**features 可能的 label**：平均密度、高密度惩罚、峰值密度、滑条占比、触摸占比、交叉手、同位连打、跳拍节奏、一笔画、偏移、爆发段、转圈、横扫
+
+**patterns 可能的 label**：错位星星、交互、纵连、跳拍、一笔画、反手/大位移同押、定拍、绝赞段、爆发、扫键、转圈、触摸拆分、散打、拆弹
+
+---
+
 ### 2. 评论接口
 
 #### 2.1 获取谱面评论
@@ -453,11 +534,19 @@ curl -H "Authorization: Bearer mk_live_xxx" \
 curl -H "Authorization: Bearer mk_live_xxx" \
   https://v.wmc.pub/api/v1/charts/123:dx:4
 
-# 3. 获取评论
+# 3. 获取谱面标签（Bot 用）
+curl -H "Authorization: Bearer mk_live_xxx" \
+  "https://v.wmc.pub/api/v1/charts/417:standard:5/tags"
+
+# 4. 自定义阈值（仅显示高分项）
+curl -H "Authorization: Bearer mk_live_xxx" \
+  "https://v.wmc.pub/api/v1/charts/417:standard:5/tags?radar_threshold=60&feature_threshold=1.0"
+
+# 5. 获取评论
 curl -H "Authorization: Bearer mk_live_xxx" \
   "https://v.wmc.pub/api/v1/charts/123:dx:4/comments"
 
-# 4. 获取排行榜
+# 6. 获取排行榜
 curl -H "Authorization: Bearer mk_live_xxx" \
   "https://v.wmc.pub/api/v1/rankings?sort=rating&limit=10"
 ```
