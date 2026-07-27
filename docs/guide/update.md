@@ -2,6 +2,17 @@
 
 ## 2026 年 7 月
 
+### 2026/07/27
+AWMC 版本号 `V26.8.12` [AWMC V2]
+
+<Badge type="tip" text="功能追加" />
+
+- **猜 Rating 游戏** — 猜 Rating 新模式：随机选群友隐藏 B50 身份与成绩（只留曲绘 / 等级 / FC / FS），限时猜最接近 Rating；支持自定义首数与时间（`猜rating 30 90`）；固定积分 + BREAK 奖励（🥇15/3、🥈5/1、🥉3/0、参与1/0）
+
+<Badge type="warning" text="优化" />
+
+- 新增谱面标签 API `GET /api/v1/charts/:chartKey/tags`，返回难度分类、雷达轴 / 评估轴标签、回归特征贡献与谱面模式检测
+
 ### 2026/07/26
 <Badge type="tip" text="功能追加" />
 

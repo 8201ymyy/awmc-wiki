@@ -194,6 +194,11 @@ The rank course image includes LIFE rules, course track level/constant, personal
 | `猜曲绘` | Jacket guessing |
 | `猜曲子` | Audio guessing |
 | `猜铺面` / `猜谱面` | Chart-video guessing (muted early phase, ending BGM; answer chime and countdown) |
+| `猜rating` | Guess Rating game (default 20 songs / 60 seconds) |
+| `猜rating 30` | Show 30 songs |
+| `猜rating 90` | Timer changed to 90 seconds |
+| `猜rating 30 90` | 30 songs + 90 seconds |
+| `重置猜rating` | Force-end the current Guess Rating round |
 | `舞萌开字母` / `开字母` | Multi-song letter board (default 8 titles); timed settlement after full clear |
 | `开字母排行` / `开字母积分榜` | Group letter score board (image) |
 | `开字母贡献榜` | Group letter contribution board (image) |
@@ -231,6 +236,24 @@ One answer every **2.5 seconds** per user globally (text / jacket / audio / char
 
 `嘿嘿，你的答案被我吃掉啦！(x.x秒后才能发送新的答案）`
 :::
+
+::: tip Guess Rating
+Requires `开启mai猜歌`. Mutually exclusive with other guess modes in the same group.
+
+- Randomly selects a group member → hides their B50 identity and scores (only shows jacket / difficulty / FC / FS) → guess the closest Rating within 60 seconds → modify answer allowed → closest guess wins
+- Customizable song count and time: `猜rating 30 90` means 30 songs + 90 seconds
+- Settlement: countdown ends → reveal true Rating + nickname → distribute points / BREAK → show full B50 image
+
+**Points (fixed)**:
+
+| Rank | Points | BREAK |
+|------|--------|-------|
+| 🥇 Closest | 15 | 3 |
+| 🥈 Second | 5 | 1 |
+| 🥉 Third | 3 | 0 |
+| Participation | 1 | 0 |
+:::
+
 ### 2.7 Play Count (PC)
 
 | Command | Description |
