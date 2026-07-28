@@ -198,7 +198,7 @@ The rank course image includes LIFE rules, course track level/constant, personal
 | `猜Rating1`–`猜Rating4` | Select a difficulty; higher levels show fewer cards and fewer clues |
 | `猜Rating3 90` | Level 3 with a 90-second timer (10–300 seconds supported) |
 | `重置猜rating` | Force-end the current Guess Rating round |
-| `B50找内鬼` / `找内鬼` / `找假卡` | Find the one card with an altered song RA among five B50 cards |
+| `找内鬼` / `找假卡` | Find the one card with an altered song RA among five B50 cards |
 | `重置找内鬼` | Force-end the current B50 Impostor round |
 | `舞萌开字母` / `开字母` | Multi-song letter board (default 8 titles); timed settlement after full clear |
 | `开字母排行` / `开字母积分榜` | Group letter score board (image) |

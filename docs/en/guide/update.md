@@ -8,7 +8,7 @@ AWMC Version `V26.8.13` [AWMC V2]
 <Badge type="tip" text="New Feature" />
 
 - **Four Guess Rating difficulties** — `猜Rating` randomly selects level 1–4; `猜Rating1`–`猜Rating4` select one explicitly. Higher levels show fewer cards and fewer score clues, with slightly higher points/BREAK. The selected B50 owner cannot answer or receive rewards.
-- **B50 Impostor** — start with `B50找内鬼`, `找内鬼`, or `找假卡`; find the one card whose song RA was altered among five B50 cards. Send 1–5 within 45 seconds; correct players are rewarded by final-answer submission time.
+- **B50 Impostor** — start with `找内鬼` or `找假卡`; find the one card whose song RA was altered among five B50 cards. Send 1–5 within 45 seconds; correct players are rewarded by final-answer submission time.
 - **Seven-mode personal guess stats** — Guess Rating and B50 Impostor now appear in trends, mode cards, share donuts, and recent details; the layout adapts to the number of modes.
 
 <Badge type="warning" text="Optimization" />
