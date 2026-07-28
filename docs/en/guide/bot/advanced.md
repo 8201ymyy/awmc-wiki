@@ -352,10 +352,10 @@ Go all-in with your entire BREAK balance. High risk, high reward. Available anyt
 
 ::: tip Welfare Pool & Claims
 
-BREAK lost from All-in goes into the welfare pool (80% distributable).
+BREAK lost from All-in goes into the welfare pool (50% distributable).
 
 - `抽奖池`: view today's contribution top-5 and claimable welfare amount (aliases: 今日贡献榜, 贡献榜)
-- `领取福利`: claim welfare proportional to your contribution; once per day per user (alias: 领福利)
+- `领取福利`: claim welfare proportional to your contribution (50% of the pool); once per day per user (alias: 领福利)
 - Must have a record of going broke in All-in on the current day to claim
 
 :::
