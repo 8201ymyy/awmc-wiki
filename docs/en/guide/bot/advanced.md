@@ -194,8 +194,8 @@ The rank course image includes LIFE rules, course track level/constant, personal
 | `猜曲绘` | Jacket guessing |
 | `猜曲子` | Audio guessing |
 | `猜铺面` / `猜谱面` | Chart-video guessing (muted early phase, ending BGM; answer chime and countdown) |
-| `猜Rating` | Random level 1–4; guess the total Rating from an anonymous B50 within 60 seconds |
-| `猜Rating1`–`猜Rating4` | Select a difficulty; higher levels show fewer cards and fewer clues |
+| `猜Rating` | Random level 1–5; guess the total Rating from an anonymous B50 within 60 seconds |
+| `猜Rating1`–`猜Rating5` | Select a difficulty; higher levels show fewer cards and fewer clues |
 | `猜Rating3 90` | Level 3 with a 90-second timer (10–300 seconds supported) |
 | `重置猜rating` | Force-end the current Guess Rating round |
 | `找内鬼` / `找假卡` | Find the one card with an altered song RA among five B50 cards |
@@ -242,7 +242,7 @@ One answer every **2.5 seconds** per user globally (text / jacket / audio / char
 Requires `开启mai猜歌`. Mutually exclusive with all other guessing modes and Letter Board in the same group.
 
 - Randomly selects a group member → hides B50 information according to difficulty → guess the closest Rating within 60 seconds → answer changes are allowed → closest guess wins
-- `猜Rating` picks a random difficulty; use `猜Rating1`–`猜Rating4` to select one. Append a 10–300 second timer, e.g. `猜Rating3 90`.
+- `猜Rating` picks a random difficulty; use `猜Rating1`–`猜Rating5` to select one. Append a 10–300 second timer, e.g. `猜Rating3 90`.
 - The selected B50 owner cannot submit a valid answer, enter the ranking, or receive rewards.
 - Settlement: countdown ends → reveal true Rating + nickname → distribute points / BREAK → show full B50 image
 
@@ -254,6 +254,7 @@ Requires `开启mai猜歌`. Mutually exclusive with all other guessing modes and
 | 2 | 16; FC/FS hidden | 18 pts + 4 BREAK | 6 pts + 1 BREAK | 4 pts |
 | 3 | 12; score rank also hidden | 21 pts + 4 BREAK | 7 pts + 2 BREAK | 5 pts |
 | 4 | 8; minimum identifying clues | 24 pts + 5 BREAK | 8 pts + 2 BREAK | 6 pts + 1 BREAK |
+| 5 | 4; almost no clues | 30 pts + 6 BREAK | 10 pts + 3 BREAK | 7 pts + 1 BREAK |
 
 Every other valid participant receives 1 point.
 :::
