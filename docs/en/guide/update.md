@@ -2,6 +2,22 @@
 
 ## July 2026
 
+### 2026/07/28
+AWMC Version `V26.8.13` [AWMC V2]
+
+<Badge type="tip" text="New Feature" />
+
+- **Four Guess Rating difficulties** — `猜Rating` randomly selects level 1–4; `猜Rating1`–`猜Rating4` select one explicitly. Higher levels show fewer cards and fewer score clues, with slightly higher points/BREAK. The selected B50 owner cannot answer or receive rewards.
+- **B50 Impostor** — start with `B50找内鬼`, `找内鬼`, or `找假卡`; find the one card whose song RA was altered among five B50 cards. Send 1–5 within 45 seconds; correct players are rewarded by final-answer submission time.
+- **Seven-mode personal guess stats** — Guess Rating and B50 Impostor now appear in trends, mode cards, share donuts, and recent details; the layout adapts to the number of modes.
+
+<Badge type="warning" text="Optimization" />
+
+- **B50 roast pricing and failure protection** — current token base price ×3; reserve 6 BREAK before the model call, then refund or charge the difference from actual usage. Model/render failures refund the reservation in full.
+- **Evidence-backed B50 analysis** — peer comparisons now include anonymized player count, chart coverage, and confidence; push candidates use the correct B35/B15 replacement floor and deterministic ordering.
+- **Completion-table cache validation** — generated tables now record a song/chart-constant signature. Stale backgrounds are rejected after catalogue changes, with an `更新完成表` reminder at startup or query time.
+- Guess Rating, B50 Impostor, Letter Board, and the other guessing modes now share the same per-group mutual exclusion and shutdown cleanup.
+
 ### 2026/07/26
 <Badge type="tip" text="New Feature" />
 

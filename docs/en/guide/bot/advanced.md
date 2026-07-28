@@ -194,11 +194,12 @@ The rank course image includes LIFE rules, course track level/constant, personal
 | `猜曲绘` | Jacket guessing |
 | `猜曲子` | Audio guessing |
 | `猜铺面` / `猜谱面` | Chart-video guessing (muted early phase, ending BGM; answer chime and countdown) |
-| `猜rating` | Guess Rating game (default 20 songs / 60 seconds) |
-| `猜rating 30` | Show 30 songs |
-| `猜rating 90` | Timer changed to 90 seconds |
-| `猜rating 30 90` | 30 songs + 90 seconds |
+| `猜Rating` | Random level 1–4; guess the total Rating from an anonymous B50 within 60 seconds |
+| `猜Rating1`–`猜Rating4` | Select a difficulty; higher levels show fewer cards and fewer clues |
+| `猜Rating3 90` | Level 3 with a 90-second timer (10–300 seconds supported) |
 | `重置猜rating` | Force-end the current Guess Rating round |
+| `B50找内鬼` / `找内鬼` / `找假卡` | Find the one card with an altered song RA among five B50 cards |
+| `重置找内鬼` | Force-end the current B50 Impostor round |
 | `舞萌开字母` / `开字母` | Multi-song letter board (default 8 titles); timed settlement after full clear |
 | `开字母排行` / `开字母积分榜` | Group letter score board (image) |
 | `开字母贡献榜` | Group letter contribution board (image) |
@@ -207,11 +208,11 @@ The rank course image includes LIFE rules, course track level/constant, personal
 | `猜歌积分排行` | Total points leaderboard |
 | `猜歌积分日榜` / `周榜` / `月榜` / `年榜` / `赛季榜` | Period leaderboards |
 | `猜歌历史日榜` / `周榜` / `月榜` / `年榜` / `赛季榜` | Historical period boards |
-| `我的猜歌` / `猜歌数据` / `猜歌统计` | Personal 5-mode 30-day trend + points/count dual radar + mode cards & recent details; `我的猜歌 @user` for others |
+| `我的猜歌` / `猜歌数据` / `猜歌统计` | Personal seven-mode 30-day trend + points/count share donuts + adaptive mode cards & recent details; `我的猜歌 @user` for others |
 
 ::: tip Personal guess stats
-- Five modes: text / jacket / audio / chart / letter (letter settlement counts under Letter)
-- Chart includes 30-day trend, mode cards, dual radar (points & counts), recent details; updates live after settlement
+- Seven modes: text / jacket / audio / chart / letter / Guess Rating / B50 Impostor
+- Chart includes the 30-day trend, adaptive mode cards, points/count share donuts, and recent details; updates live after settlement
 - `@someone` views that member’s group stats, e.g. `我的猜歌 @Alice`; without at, shows yourself
 - In-group `我的AWMC` automatically attaches the group guess-stats image (failure does not block account status)
 :::
@@ -232,26 +233,39 @@ Requires `开启mai猜歌`. Mutually exclusive with other guess modes in the sam
 :::
 
 ::: warning Answer rate limit
-One answer every **2.5 seconds** per user globally (text / jacket / audio / chart). Over limit:
+One answer every **2.5 seconds** per user globally (text / jacket / audio / chart / Guess Rating / B50 Impostor). Over limit:
 
 `嘿嘿，你的答案被我吃掉啦！(x.x秒后才能发送新的答案）`
 :::
 
 ::: tip Guess Rating
-Requires `开启mai猜歌`. Mutually exclusive with other guess modes in the same group.
+Requires `开启mai猜歌`. Mutually exclusive with all other guessing modes and Letter Board in the same group.
 
-- Randomly selects a group member → hides their B50 identity and scores (only shows jacket / difficulty / FC / FS) → guess the closest Rating within 60 seconds → modify answer allowed → closest guess wins
-- Customizable song count and time: `猜rating 30 90` means 30 songs + 90 seconds
+- Randomly selects a group member → hides B50 information according to difficulty → guess the closest Rating within 60 seconds → answer changes are allowed → closest guess wins
+- `猜Rating` picks a random difficulty; use `猜Rating1`–`猜Rating4` to select one. Append a 10–300 second timer, e.g. `猜Rating3 90`.
+- The selected B50 owner cannot submit a valid answer, enter the ranking, or receive rewards.
 - Settlement: countdown ends → reveal true Rating + nickname → distribute points / BREAK → show full B50 image
 
-**Points (fixed)**:
+**Difficulty and top-three rewards**:
 
-| Rank | Points | BREAK |
-|------|--------|-------|
-| 🥇 Closest | 15 | 3 |
-| 🥈 Second | 5 | 1 |
-| 🥉 Third | 3 | 0 |
-| Participation | 1 | 0 |
+| Level | Cards / clues | 🥇 | 🥈 | 🥉 |
+|-------|---------------|----|----|----|
+| 1 | 20; score rank and FC/FS shown | 15 pts + 3 BREAK | 5 pts + 1 BREAK | 3 pts |
+| 2 | 16; FC/FS hidden | 18 pts + 4 BREAK | 6 pts + 1 BREAK | 4 pts |
+| 3 | 12; score rank also hidden | 21 pts + 4 BREAK | 7 pts + 2 BREAK | 5 pts |
+| 4 | 8; minimum identifying clues | 24 pts + 5 BREAK | 8 pts + 2 BREAK | 6 pts + 1 BREAK |
+
+Every other valid participant receives 1 point.
+:::
+
+::: tip B50 Impostor
+Requires `开启mai猜歌`. Mutually exclusive with all other guessing modes and Letter Board in the same group.
+
+- The game draws five cards from a random group member's B50 and alters the song RA on one card.
+- Send `1`–`5` within 45 seconds. Answers can be changed; speed ranking uses the final-answer submission time.
+- The selected B50 owner cannot submit a valid answer or receive rewards.
+- First correct: 10 points + 2 BREAK; second: 6 points + 1 BREAK; third and later correct players: 3 points.
+- Settlement highlights the impostor and shows both the real and altered RA.
 :::
 
 ### 2.7 Play Count (PC)
@@ -314,6 +328,8 @@ B50 uses Diving Fish or Lxns per preference; some features fall back to Diving F
 | `AWMC帮助` | BREAK system help |
 
 > First actual score-API request per day is free; each later request costs 1 BREAK (cache hits are free).
+> B50 analysis costs 3× the token base price (6–60 BREAK). It reserves 6 BREAK before the model call, settles the difference from actual usage, and fully refunds model/render failures.
+> Normal song guesses award the default 1 BREAK; Guess Rating and B50 Impostor use their own rank/difficulty rewards.
 
 ### 2.11 Advanced
 
