@@ -327,6 +327,33 @@ B50 uses Diving Fish or Lxns per preference; some features fall back to Diving F
 | `AWMC签到` | Daily check-in for BREAK |
 | `我的AWMC` | Account status and usage; in-group attaches guess-stats image |
 | `AWMC帮助` | BREAK system help |
+| `转账BREAK @用户 数量` | Transfer BREAK to another user |
+| `BREAK抽奖 [1-10]` | BREAK lottery; default 2 BREAK per draw, up to 10 |
+| `倾家荡产 [mode]` | All-in BREAK lottery (Standard / Exciting / High Risk) |
+| `抽奖池` | View today's contribution top-5 and claimable welfare amount |
+| `领取福利` | Claim today's welfare (once per day) |
+
+::: tip All-in (倾家荡产)
+
+Go all-in with your entire BREAK balance. High risk, high reward.
+
+- **Standard** (default): 65% no-win, 85% expected return rate
+- **Exciting**: 75% no-win, 80% expected return rate
+- **High Risk**: 80% no-win, 100% expected return rate
+- Flow: send command → confirm balance → confirm again → result
+- Alias: `梭哈`
+
+:::
+
+::: tip Welfare Pool & Claims
+
+BREAK lost from All-in goes into the welfare pool (80% distributable).
+
+- `抽奖池`: view today's contribution top-5 and claimable welfare amount (aliases: 今日贡献榜, 贡献榜)
+- `领取福利`: claim welfare proportional to your contribution; once per day per user (alias: 领福利)
+- Must have a record of going broke in All-in on the current day to claim
+
+:::
 
 > First actual score-API request per day is free; each later request costs 1 BREAK (cache hits are free).
 > B50 analysis costs 3× the token base price (6–60 BREAK). It reserves 6 BREAK before the model call, settles the difference from actual usage, and fully refunds model/render failures.
