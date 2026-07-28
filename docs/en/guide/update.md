@@ -10,7 +10,7 @@ AWMC Version `V26.8.13` [AWMC V2]
 - **Four Guess Rating difficulties** — `猜Rating` randomly selects level 1–4; `猜Rating1`–`猜Rating4` select one explicitly. Higher levels show fewer cards and fewer score clues, with slightly higher points/BREAK. The selected B50 owner cannot answer or receive rewards.
 - **B50 Impostor** — start with `找内鬼` or `找假卡`; find the one card whose song RA was altered among five B50 cards. Send 1–5 within 45 seconds; correct players are rewarded by final-answer submission time.
 - **Seven-mode personal guess stats** — Guess Rating and B50 Impostor now appear in trends, mode cards, share donuts, and recent details; the layout adapts to the number of modes.
-- **All-in (倾家荡产)** — Go all-in with your entire BREAK balance. Three modes: Standard (65% no-win, 85% return), Exciting (75%, 80%), High Risk (80%, 100%). Lost BREAK enters the welfare pool (80% distributable).
+- **All-in (倾家荡产)** — Go all-in with your entire BREAK balance. Three modes: Standard (2 BREAK entry, 70% no-win, 50x max), Exciting (3 BREAK, 78%, 100x), High Risk (5 BREAK, 82%, 100x). Entry fee is non-refundable. Available anytime (no date restriction). Lost BREAK enters the welfare pool (80% distributable).
 - **Welfare Pool** / `领取福利` — View today's contribution leaderboard and claim proportional welfare; once per day per user.
 
 <Badge type="warning" text="Optimization" />

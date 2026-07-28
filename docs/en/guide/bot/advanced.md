@@ -335,11 +335,16 @@ B50 uses Diving Fish or Lxns per preference; some features fall back to Diving F
 
 ::: tip All-in (倾家荡产)
 
-Go all-in with your entire BREAK balance. High risk, high reward.
+Go all-in with your entire BREAK balance. High risk, high reward. Available anytime (no date restriction).
 
-- **Standard** (default): 65% no-win, 85% expected return rate
-- **Exciting**: 75% no-win, 80% expected return rate
-- **High Risk**: 80% no-win, 100% expected return rate
+**Entry fee (non-refundable)**:
+
+| Mode | Entry Fee | No-win rate | Max Multiplier |
+|------|-----------|-------------|----------------|
+| Standard (default) | 2 BREAK | 70% | 50x |
+| Exciting | 3 BREAK | 78% | 100x |
+| High Risk | 5 BREAK | 82% | 100x |
+
 - Flow: send command → confirm balance → confirm again → result
 - Alias: `梭哈`
 
