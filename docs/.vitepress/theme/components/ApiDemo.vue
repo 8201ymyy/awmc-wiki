@@ -282,7 +282,7 @@ const formatMethod = (method) => {
         </div>
 
         <!-- 鉴权部分 -->
-        <div v-if="currentApi.baseUrl.includes('api.awmc.') || currentApi.baseUrl.includes('v.wmc.pub')" class="auth-section">
+        <div v-if="currentApi.baseUrl.includes('api.awmc.') || currentApi.baseUrl.includes('v.wmc.pub') || currentApi.baseUrl.includes('api.wmc.pub')" class="auth-section">
           <div class="section-title">鉴权设置 (Authorization)</div>
           <div class="auth-box">
             <span class="auth-prefix">Bearer</span>
