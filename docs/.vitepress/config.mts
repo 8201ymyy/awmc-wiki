@@ -65,7 +65,8 @@ export default defineConfig({
         nav: [
           { text: '首页', link: '/' },
           { text: '帮助文档', link: '/guide/introduction' },
-          { text: '开发指南', link: '/dev/' }
+          { text: '开发指南', link: '/dev/' },
+          { text: 'API 调试', link: '/dev/api-docs' }
         ],
         sidebar: {
           '/guide/': [
@@ -94,6 +95,7 @@ export default defineConfig({
               text: '💻 开发者中心',
               items: [
                 { text: '开发概览', link: '/dev/' },
+                { text: 'Swagger UI', link: '/dev/api-docs' },
               ]
             },
             {
@@ -137,7 +139,8 @@ export default defineConfig({
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Guide', link: '/en/guide/introduction' },
-          { text: 'Dev', link: '/en/dev/' }
+          { text: 'Dev', link: '/en/dev/' },
+          { text: 'API Reference', link: '/en/dev/api-docs' }
         ],
         sidebar: {
           '/en/guide/': [
@@ -165,7 +168,8 @@ export default defineConfig({
             {
               text: '💻 Developer Center',
               items: [
-                { text: 'Dev Overview', link: '/en/dev/' }
+                { text: 'Dev Overview', link: '/en/dev/' },
+                { text: 'Swagger UI', link: '/en/dev/api-docs' }
               ]
             },
             {

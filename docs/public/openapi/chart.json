@@ -1,0 +1,159 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AWMC Chart Review & Analysis API",
+    "version": "1.0.0",
+    "description": "谱面查询、标签、评论、评分、成绩和排行榜接口。业务接口使用谱面平台单独签发的 API Key。"
+  },
+  "servers": [{ "url": "https://v.wmc.pub", "description": "Production" }],
+  "tags": [
+    { "name": "Charts" }, { "name": "Comments" }, { "name": "Ratings" },
+    { "name": "Scores" }, { "name": "Rankings" }, { "name": "Stats" },
+    { "name": "API Keys" }, { "name": "Admin" }
+  ],
+  "paths": {
+    "/api/v1/charts": {
+      "get": {
+        "tags": ["Charts"], "summary": "获取谱面列表", "security": [{ "ChartApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Page" }, { "$ref": "#/components/parameters/Limit50" },
+          { "name": "kind", "in": "query", "schema": { "$ref": "#/components/schemas/ChartKind" } },
+          { "name": "difficulty", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 6 } },
+          { "name": "q", "in": "query", "description": "标题或艺术家关键词", "schema": { "type": "string" } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["newest", "views", "rating"], "default": "newest" } }
+        ],
+        "responses": { "200": { "description": "Chart list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ChartList" } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" } }
+      }
+    },
+    "/api/v1/charts/{chartKey}": {
+      "get": {
+        "tags": ["Charts"], "summary": "获取谱面详情", "security": [{ "ChartApiKey": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/ChartKey" }],
+        "responses": { "200": { "description": "Chart detail", "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Chart" }, { "type": "object", "properties": { "configAnalysis": { "type": "object", "additionalProperties": true } } }] } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" }, "404": { "$ref": "#/components/responses/NotFound" } }
+      }
+    },
+    "/api/v1/charts/{chartKey}/tags": {
+      "get": {
+        "tags": ["Charts"], "summary": "获取谱面标签摘要", "security": [{ "ChartApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/ChartKey" },
+          { "name": "radar_threshold", "in": "query", "schema": { "type": "integer", "minimum": 20, "maximum": 60, "default": 40 } },
+          { "name": "feature_threshold", "in": "query", "schema": { "type": "number", "minimum": 0.1, "maximum": 2, "default": 0.5 } }
+        ],
+        "responses": { "200": { "description": "Chart tags", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ChartTags" } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" }, "404": { "$ref": "#/components/responses/NotFound" } }
+      }
+    },
+    "/api/v1/charts/{chartKey}/comments": {
+      "get": {
+        "tags": ["Comments"], "summary": "获取谱面评论", "security": [{ "ChartApiKey": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/ChartKey" }, { "$ref": "#/components/parameters/Page" }, { "$ref": "#/components/parameters/Limit" }],
+        "responses": { "200": { "description": "Comments", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedResult" } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" } }
+      }
+    },
+    "/api/v1/charts/{chartKey}/ratings": {
+      "get": {
+        "tags": ["Ratings"], "summary": "获取评分统计", "security": [{ "ChartApiKey": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/ChartKey" }],
+        "responses": { "200": { "description": "Rating stats", "content": { "application/json": { "schema": { "type": "object", "properties": { "chartKey": { "type": "string" }, "ratingAverage": { "type": "number" }, "ratingCount": { "type": "integer" }, "distribution": { "type": "object", "additionalProperties": { "type": "integer" } } } } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" } }
+      }
+    },
+    "/api/v1/charts/{chartKey}/scores": {
+      "get": {
+        "tags": ["Scores"], "summary": "获取成绩提交", "security": [{ "ChartApiKey": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/ChartKey" }, { "$ref": "#/components/parameters/Page" }, { "$ref": "#/components/parameters/Limit" }],
+        "responses": { "200": { "description": "Scores", "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/PaginatedResult" }, { "type": "object", "properties": { "stats": { "type": "object", "additionalProperties": true } } }] } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" } }
+      }
+    },
+    "/api/v1/rankings": {
+      "get": {
+        "tags": ["Rankings"], "summary": "获取谱面排行榜", "security": [{ "ChartApiKey": [] }],
+        "parameters": [
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["views", "rating"], "default": "rating" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 20, "default": 10 } }
+        ],
+        "responses": { "200": { "description": "Rankings", "content": { "application/json": { "schema": { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Chart" } } } } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" } }
+      }
+    },
+    "/api/v1/stats": {
+      "get": {
+        "tags": ["Stats"], "summary": "获取全局统计", "security": [{ "ChartApiKey": [] }],
+        "responses": { "200": { "description": "Global stats", "content": { "application/json": { "schema": { "type": "object", "properties": { "totalViews": { "type": "integer" }, "totalRatings": { "type": "integer" }, "totalComments": { "type": "integer" }, "totalCharts": { "type": "integer" }, "totalUsers": { "type": "integer" } } } } } }, "401": { "$ref": "#/components/responses/InvalidChartKey" } }
+      }
+    },
+    "/api/v1/api-keys": {
+      "get": {
+        "tags": ["API Keys"], "summary": "列出我的 API Key", "description": "使用网页登录会话或登录 JWT，不能使用谱面 API Key 自身管理 Key。",
+        "security": [{ "ChartAccountToken": [] }],
+        "responses": { "200": { "description": "API keys", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ApiKeyMetadata" } } } } }, "401": { "$ref": "#/components/responses/UnauthorizedAccount" } }
+      },
+      "post": {
+        "tags": ["API Keys"], "summary": "创建 API Key", "description": "Key 仅在创建时显示一次。",
+        "security": [{ "ChartAccountToken": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string", "example": "我的应用" } } } } } },
+        "responses": { "200": { "description": "Created API key", "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ApiKeyMetadata" }, { "type": "object", "properties": { "key": { "type": "string", "example": "mk_live_xxxxx" } } }] } } } }, "401": { "$ref": "#/components/responses/UnauthorizedAccount" } }
+      }
+    },
+    "/api/v1/api-keys/{id}": {
+      "delete": {
+        "tags": ["API Keys"], "summary": "删除 API Key", "security": [{ "ChartAccountToken": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": { "200": { "description": "Deleted" }, "401": { "$ref": "#/components/responses/UnauthorizedAccount" }, "404": { "$ref": "#/components/responses/NotFound" } }
+      }
+    },
+    "/api/v1/admin/api-usage": {
+      "get": {
+        "tags": ["Admin"], "summary": "获取 API 使用统计", "security": [{ "ChartAccountToken": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Period" }, { "name": "userId", "in": "query", "schema": { "type": "string" } }, { "name": "apiKeyId", "in": "query", "schema": { "type": "string" } }],
+        "responses": { "200": { "$ref": "#/components/responses/JsonResponse" }, "401": { "$ref": "#/components/responses/UnauthorizedAccount" }, "403": { "description": "需要管理员权限" } }
+      }
+    },
+    "/api/v1/admin/api-usage/trends": {
+      "get": {
+        "tags": ["Admin"], "summary": "获取 API 调用趋势", "security": [{ "ChartAccountToken": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Period" }, { "name": "groupBy", "in": "query", "schema": { "type": "string", "enum": ["hour", "day"], "default": "day" } }],
+        "responses": { "200": { "$ref": "#/components/responses/JsonResponse" }, "401": { "$ref": "#/components/responses/UnauthorizedAccount" }, "403": { "description": "需要管理员权限" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ChartApiKey": {
+        "type": "http", "scheme": "bearer",
+        "description": "仅用于 v.wmc.pub 业务 API：在谱面平台 /api-keys 页面生成的 mk_live_ API Key。请勿填写 AWMC gw_ 令牌。"
+      },
+      "ChartAccountToken": {
+        "type": "http", "scheme": "bearer",
+        "description": "仅用于 API Key 管理与管理员接口：谱面平台网页登录 JWT。浏览器 Session Cookie 由浏览器自动携带，无法在此输入。"
+      }
+    },
+    "parameters": {
+      "ChartKey": { "name": "chartKey", "in": "path", "required": true, "description": "{songId}:{kind}:{difficulty}", "schema": { "type": "string", "example": "417:standard:5" } },
+      "Page": { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+      "Limit": { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 15 } },
+      "Limit50": { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 20 } },
+      "Period": { "name": "period", "in": "query", "schema": { "type": "string", "enum": ["day", "week", "month"], "default": "day" } }
+    },
+    "responses": {
+      "InvalidChartKey": { "description": "谱面 API Key 缺失或无效" },
+      "UnauthorizedAccount": { "description": "网页登录会话或登录 JWT 缺失或无效" },
+      "NotFound": { "description": "Resource not found" },
+      "JsonResponse": { "description": "JSON response", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } }
+    },
+    "schemas": {
+      "ChartKind": { "type": "string", "enum": ["standard", "dx"] },
+      "Chart": {
+        "type": "object",
+        "properties": {
+          "chartKey": { "type": "string", "example": "123:dx:4" }, "songId": { "type": "integer" },
+          "title": { "type": "string" }, "artist": { "type": "string" }, "kind": { "$ref": "#/components/schemas/ChartKind" },
+          "difficulty": { "type": "integer" }, "levelLabel": { "type": "string" }, "views": { "type": "integer" },
+          "ratingAverage": { "type": "number" }, "ratingCount": { "type": "integer" }, "commentCount": { "type": "integer" }, "correctionCount": { "type": "integer" }
+        }
+      },
+      "ChartList": { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Chart" } }, "total": { "type": "integer" }, "page": { "type": "integer" }, "limit": { "type": "integer" } } },
+      "PaginatedResult": { "type": "object", "properties": { "items": { "type": "array", "items": { "type": "object", "additionalProperties": true } }, "total": { "type": "integer" }, "page": { "type": "integer" }, "limit": { "type": "integer" } } },
+      "ChartTags": { "type": "object", "properties": { "chartKey": { "type": "string" }, "title": { "type": "string" }, "artist": { "type": "string" }, "kind": { "$ref": "#/components/schemas/ChartKind" }, "difficulty": { "type": "integer" }, "levelLabel": { "type": "string" }, "tags": { "type": "object", "additionalProperties": true } } },
+      "ApiKeyMetadata": { "type": "object", "properties": { "id": { "type": "string", "format": "uuid" }, "name": { "type": "string" }, "prefix": { "type": "string", "example": "mk_live_xxx" }, "createdAt": { "type": "string", "format": "date-time" } } }
+    }
+  }
+}

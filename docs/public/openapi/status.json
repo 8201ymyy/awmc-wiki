@@ -1,0 +1,28 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "AWMC Status API", "version": "1.0.0", "description": "基于 Uptime Kuma 的公开状态接口，无需 API Key。" },
+  "servers": [{ "url": "https://status.awmc.cc" }],
+  "paths": {
+    "/api/status-page/{slug}": {
+      "get": {
+        "summary": "获取状态页配置", "description": "返回公告、维护计划、分组及监控项。",
+        "parameters": [{ "$ref": "#/components/parameters/Slug" }],
+        "responses": { "200": { "description": "Status page", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StatusPage" } } } } }
+      }
+    },
+    "/api/status-page/heartbeat/{slug}": {
+      "get": {
+        "summary": "获取实时状态与心跳", "parameters": [{ "$ref": "#/components/parameters/Slug" }],
+        "responses": { "200": { "description": "Heartbeat data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HeartbeatResponse" } } } } }
+      }
+    }
+  },
+  "components": {
+    "parameters": { "Slug": { "name": "slug", "in": "path", "required": true, "schema": { "type": "string", "enum": ["maimai", "maimai-lite"], "example": "maimai" } } },
+    "schemas": {
+      "StatusPage": { "type": "object", "properties": { "incidents": { "type": "array", "items": { "type": "object", "additionalProperties": true } }, "publicGroupList": { "type": "array", "items": { "type": "object", "additionalProperties": true } }, "maintenanceList": { "type": "array", "items": { "type": "object", "additionalProperties": true } } } },
+      "HeartbeatResponse": { "type": "object", "properties": { "heartbeatList": { "type": "object", "additionalProperties": { "type": "array", "items": { "$ref": "#/components/schemas/Heartbeat" } } }, "uptimeList": { "type": "object", "additionalProperties": true } } },
+      "Heartbeat": { "type": "object", "properties": { "status": { "type": "integer", "enum": [0, 1, 2, 3], "description": "0=Down, 1=Up, 2=Pending, 3=Maintenance" }, "time": { "type": "string" }, "msg": { "type": "string" }, "ping": { "type": "number" } } }
+    }
+  }
+}

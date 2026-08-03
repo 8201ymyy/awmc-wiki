@@ -1,0 +1,141 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AWMC Gateway API",
+    "version": "1.0.0",
+    "description": "AWMC 公共网关接口。标注的 Token 消耗仅在 HTTP 请求成功且上游业务成功时扣除。"
+  },
+  "servers": [{ "url": "https://api.wmc.pub", "description": "Production" }],
+  "tags": [
+    { "name": "Health", "description": "服务健康检查" },
+    { "name": "User", "description": "舞萌用户数据查询" },
+    { "name": "Charge", "description": "发票充值与队列" },
+    { "name": "Upload", "description": "成绩上传" },
+    { "name": "Usage", "description": "调用统计" }
+  ],
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "tags": ["Health"], "summary": "上游健康检查", "description": "消耗 0 Token。",
+        "responses": { "200": { "$ref": "#/components/responses/Success" } }
+      }
+    },
+    "/v1/user/data": {
+      "post": {
+        "tags": ["User"], "summary": "查询用户详细数据", "description": "消耗 1 Token。响应 msg 可能为需要二次解析的 JSON 字符串。",
+        "security": [{ "AWMCGatewayToken": [] }], "requestBody": { "$ref": "#/components/requestBodies/Qrcode" },
+        "responses": { "200": { "$ref": "#/components/responses/Success" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/InsufficientBalance" } }
+      }
+    },
+    "/v1/user/region": {
+      "post": {
+        "tags": ["User"], "summary": "查询地区与段位", "description": "消耗 1 Token。",
+        "security": [{ "AWMCGatewayToken": [] }], "requestBody": { "$ref": "#/components/requestBodies/Qrcode" },
+        "responses": { "200": { "$ref": "#/components/responses/Success" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/InsufficientBalance" } }
+      }
+    },
+    "/v1/user/music": {
+      "post": {
+        "tags": ["User"], "summary": "查询全部谱面成绩", "description": "消耗 2 Token，响应体积较大。",
+        "security": [{ "AWMCGatewayToken": [] }], "requestBody": { "$ref": "#/components/requestBodies/Qrcode" },
+        "responses": { "200": { "$ref": "#/components/responses/Success" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/InsufficientBalance" } }
+      }
+    },
+    "/v1/user/charge": {
+      "post": {
+        "tags": ["User"], "summary": "查询发票与票券", "description": "只读查询，消耗 1 Token。",
+        "security": [{ "AWMCGatewayToken": [] }], "requestBody": { "$ref": "#/components/requestBodies/Qrcode" },
+        "responses": { "200": { "$ref": "#/components/responses/Success" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/InsufficientBalance" } }
+      }
+    },
+    "/v1/charge": {
+      "post": {
+        "tags": ["Charge"], "summary": "发票充值入队", "description": "消耗 10 Token。成功后会将舞萌 userId 与当前网关账号绑定。",
+        "security": [{ "AWMCGatewayToken": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ChargeRequest" } } } },
+        "responses": { "200": { "$ref": "#/components/responses/Success" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/InsufficientBalance" } }
+      }
+    },
+    "/v1/charge/queue": {
+      "get": {
+        "tags": ["Charge"], "summary": "查询本人的充值队列", "description": "消耗 0 Token。仅返回已绑定 userId 的任务，且不包含 qrToken。",
+        "security": [{ "AWMCGatewayToken": [] }],
+        "responses": { "200": { "description": "Queue", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QueueResponse" } } } }, "401": { "$ref": "#/components/responses/Unauthorized" } }
+      }
+    },
+    "/v1/update-lx": {
+      "post": {
+        "tags": ["Upload"], "summary": "上传成绩到落雪 LX", "description": "消耗 5 Token。",
+        "security": [{ "AWMCGatewayToken": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateLxRequest" } } } },
+        "responses": { "200": { "$ref": "#/components/responses/Success" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/InsufficientBalance" } }
+      }
+    },
+    "/v1/update-fish": {
+      "post": {
+        "tags": ["Upload"], "summary": "上传成绩到 DivingFish", "description": "消耗 5 Token。请求体中的 token 是 DivingFish Import-Token，不是 AWMC 网关令牌。",
+        "security": [{ "AWMCGatewayToken": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateFishRequest" } } } },
+        "responses": { "200": { "$ref": "#/components/responses/Success" }, "401": { "$ref": "#/components/responses/Unauthorized" }, "403": { "$ref": "#/components/responses/InsufficientBalance" } }
+      }
+    },
+    "/me/usage": {
+      "get": {
+        "tags": ["Usage"], "summary": "查询本人调用明细", "security": [{ "AWMCGatewayToken": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Limit" }, { "$ref": "#/components/parameters/Offset" }],
+        "responses": { "200": { "$ref": "#/components/responses/JsonResponse" }, "401": { "$ref": "#/components/responses/Unauthorized" } }
+      }
+    },
+    "/me/usage/stats": {
+      "get": {
+        "tags": ["Usage"], "summary": "查询本人的日粒度统计", "security": [{ "AWMCGatewayToken": [] }],
+        "parameters": [{ "name": "days", "in": "query", "schema": { "type": "integer", "enum": [7, 14, 30], "default": 7 } }],
+        "responses": { "200": { "$ref": "#/components/responses/JsonResponse" }, "401": { "$ref": "#/components/responses/Unauthorized" } }
+      }
+    },
+    "/usage/failure-rate": {
+      "get": {
+        "tags": ["Usage"], "summary": "查询全站失败率", "description": "无需鉴权，固定返回近 7 天、30 分钟粒度的数据。",
+        "responses": { "200": { "$ref": "#/components/responses/FailureRate" } }
+      }
+    },
+    "/me/usage/failure-rate": {
+      "get": {
+        "tags": ["Usage"], "summary": "查询本人失败率", "description": "固定返回近 7 天、30 分钟粒度的数据。",
+        "security": [{ "AWMCGatewayToken": [] }],
+        "responses": { "200": { "$ref": "#/components/responses/FailureRate" }, "401": { "$ref": "#/components/responses/Unauthorized" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "AWMCGatewayToken": {
+        "type": "http", "scheme": "bearer",
+        "description": "仅用于 api.wmc.pub：AWMC 通行证 JWT，或个人中心生成的 gw_ 长期令牌。请勿填写谱面平台或 AWMCNET 的 Key。"
+      }
+    },
+    "parameters": {
+      "Limit": { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1 } },
+      "Offset": { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0, "default": 0 } }
+    },
+    "requestBodies": {
+      "Qrcode": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QrcodeRequest" } } } }
+    },
+    "responses": {
+      "Success": { "description": "业务响应", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GatewayResponse" } } } },
+      "JsonResponse": { "description": "JSON response", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+      "Unauthorized": { "description": "令牌缺失或无效" },
+      "InsufficientBalance": { "description": "余额不足或无权访问" },
+      "FailureRate": { "description": "失败率统计", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FailureRateResponse" } } } }
+    },
+    "schemas": {
+      "QrcodeRequest": { "type": "object", "required": ["qrcode"], "properties": { "qrcode": { "type": "string", "description": "SGWCMAID... 二维码内容或官方链接" } } },
+      "ChargeRequest": { "allOf": [{ "$ref": "#/components/schemas/QrcodeRequest" }, { "type": "object", "required": ["charge"], "properties": { "charge": { "type": "integer", "example": 5 } } }] },
+      "UpdateLxRequest": { "allOf": [{ "$ref": "#/components/schemas/QrcodeRequest" }, { "type": "object", "required": ["key", "type"], "properties": { "key": { "type": "string", "description": "落雪相关密钥或好友码" }, "type": { "type": "string", "example": "maimai" } } }] },
+      "UpdateFishRequest": { "allOf": [{ "$ref": "#/components/schemas/QrcodeRequest" }, { "type": "object", "required": ["token"], "properties": { "token": { "type": "string", "description": "DivingFish Import-Token" } } }] },
+      "GatewayResponse": { "type": "object", "properties": { "code": { "type": "integer", "example": 0 }, "msg": { "description": "字符串、对象，或需二次解析的 JSON 字符串" } }, "additionalProperties": true },
+      "QueueResponse": { "type": "object", "properties": { "code": { "type": "integer", "example": 0 }, "tasks": { "type": "array", "items": { "type": "object", "additionalProperties": true } }, "workers": { "type": "integer", "example": 1 } } },
+      "FailureRateResponse": { "type": "object", "properties": { "scope": { "type": "string", "enum": ["global", "user"] }, "days": { "type": "integer", "example": 7 }, "bucketMinutes": { "type": "integer", "example": 30 }, "series": { "type": "array", "items": { "type": "object", "additionalProperties": true } }, "summary": { "type": "object", "additionalProperties": true } } }
+    }
+  }
+}
