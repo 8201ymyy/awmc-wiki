@@ -120,7 +120,9 @@ Gate status includes the names: 1 Blue Gate, 2 White Gate, 3 Purple Gate, 4 Blac
 | `mai清票` / `清票` | Clears all Charge tickets after confirmation; 10 BREAK on success. |
 | `mai改道具` / `改道具 [itemKind itemId add/del]` | Untested high-risk item mutation; 100 BREAK on success and always requires risk confirmation. |
 
-Score editing resolves song IDs, titles, and aliases. Achievement accepts percentages such as
+Score editing resolves song IDs, titles, and aliases. Interactive difficulty selection accepts
+`0 BASIC`, `1 ADVANCED`, `2 EXPERT`, `3 MASTER`, and `4 Re:MASTER`; songs without a Re:MASTER
+chart only accept `0-3`. Achievement accepts percentages such as
 `100.5%`. DX values from 0 to 5 select the default simple/fuzzy mode (DX star rating); larger
 values select professional/exact mode and are validated against the chart maximum.
 

@@ -124,7 +124,9 @@ https://wq.wahlap.net/qrcode/req/MAID....html
 | `mai改道具` / `改道具` | 高风险交互式道具修改；成功扣 100 BREAK / 次 |
 | `mai改道具` / `改道具 <itemKind> <itemId> <add/del>` | 预填参数后仍需确认风险 |
 
-成绩命令支持歌曲 ID、完整曲名和别名；难度支持 `BASIC/ADV/EXP/MAS/Re:MAS`、
+成绩命令支持歌曲 ID、完整曲名和别名；交互选择难度时可发送数字：`0 BASIC`、`1 ADVANCED`、
+`2 EXPERT`、`3 MASTER`、`4 Re:MASTER`；没有 Re:MASTER 谱面的歌曲只能选择 `0-3`。
+难度也支持 `BASIC/ADV/EXP/MAS/Re:MAS`、
 绿/黄/红/紫/白，以及宴会场的“宴”。达成率可写 `100.5%`，也可写 `0.995`
 （自动解析为 `99.5%`）。
 
