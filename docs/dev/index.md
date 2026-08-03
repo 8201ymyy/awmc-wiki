@@ -29,7 +29,7 @@ chartPreviewBaseUrl: https://v.awmc.cc
 :::
 
 - **鉴权方式**：<Badge type="warning" text="Bearer 令牌" /> (需在 Authorization 中携带)
-- **消耗规则**：HTTP 成功且上游 `code === 0` 时扣 Token，详见计费说明。
+- **消耗规则**：HTTP 成功且上游业务成功时扣 Token（普通接口 `returnCode===1`，health/ping 为 `0`）。对外路径尽量兼容旧 `/v1/*`。
 - **详细文档**：[点击查看 AWMC 公共 API 详情](/dev/awmc-api)
 
 ## 🖼️ Assets 静态资源 API (基准地址: `{{ $frontmatter.assetsApiBaseUrl }}`)

@@ -1,290 +1,349 @@
 ---
 apiBaseUrl: https://api.wmc.pub
 ---
-# AWMC Gateway Public API (Billing Info)
+# AWMC Gateway Public API (Billing)
 
-For **end users**: how to call the public APIs and **when Tokens are charged**. This page does not cover internals.
+For **end users**: how to call open endpoints and **when Tokens are charged**. This page does not cover upstream wire encoding.
 
 ::: tip Platform
 Platform: https://api.wmc.pub
 
-Docs: https://wiki.awmc.team/dev/awmc-api
+Docs: https://wiki.awmc.team/en/dev/awmc-api
 
-Sign in with your **AWMC passport (forum account)**, then create a `gw_` token in the dashboard (or use the login JWT).
+Sign in with an **AWMC passport (forum account)**, then create a `gw_` token or use the login JWT.
 :::
 
-::: warning Authentication
-Send on every business request:
+::: warning Auth
+Send:
 
 `Authorization: Bearer <token>`
 
-- Browser JWT after login, or a long-lived **`gw_`** token from the dashboard (keep it secret).
+- Session JWT after browser login, or a long-lived **`gw_` token** from the console (keep secret).
 :::
 
 ::: tip Buy Tokens
-Top up via **card-code redeem**. Cards are sold at: https://store.awmc.cc/item?id=98  
-Redeem in the dashboard, or `POST /redeem` with a login token.
+Top up with **card codes** from the store: https://store.awmc.cc/item?id=98  
+Redeem in the console or via `POST /redeem`.
 :::
 
 ::: info keychip
-`keychip` is injected by the gateway. Callers **must not** send it. Only pass business fields such as `qrcode`.
+`keychip` is injected by the gateway. Callers must **not** send it. Provide business fields only (e.g. `qrcode`).
 :::
 
-## 1. Base URL and Paths
+::: danger High-risk operations (read first)
+These actions **may cause irreversible, severe damage to an account**. Do not call them casually:
 
-All business paths are under the gateway root with prefix **`/v1`**.
+1. **Gate edits**: `POST /v1/kaleidx-scope/upsert` (Kaleidx Scope Gate state).
+2. **Unverified collectibles**: writing **`itemKind` `4` / `8` / `15`** via `POST /v1/item/upsert` or `POST /v1/user/upsert-all`.
 
-- **GET**: usually no body (health, charge queue).
-- **POST**: **JSON body** with `Content-Type: application/json`.
-- Upstream responses are often `{ "code": 0, "msg": "..." }`. Some `msg` values are **JSON strings** and need a second `JSON.parse`.
+The gateway does **not** block these requests; you accept the risk by calling them.
+:::
 
-## 2. Token Billing
+## 1. Base URL & path compatibility
 
-- **"Cost"** below is charged when the response is **HTTP 2xx** and business succeeds (typically **`code === 0`**). **0** means free.
-- Insufficient balance → **403** `Insufficient balance`.
+All business paths are under **`/v1`** on the gateway.
+
+- Upstream is **PyMai API v2**; **public paths stay as close as possible to the old ones** (e.g. still `/v1/user/data`).
+- **POST** with **plain JSON** (`Content-Type: application/json`). zlib/Base64 is handled by the gateway.
+- Responses include:
+  - Upstream: `returnCode`, `returnMessage` (and `businessData` when applicable)
+  - Compatibility: **`code === 0`** on business success; `msg` often JSON-parseable
+
+**Success (billing)**
+
+| Endpoint | Upstream success |
+|----------|------------------|
+| `GET /v1/health` | `returnCode === 0` (ping) |
+| Other business | `returnCode === 1` |
+
+Prefer `returnCode` in new clients; legacy clients may use `code === 0`.
+
+## 2. Token pricing
+
+Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client timeout.
+
+### 2.1 Legacy-compatible paths
 
 | Method | Path | Cost | Notes |
-|--------|------|------|--------|
-| GET | `/v1/health` | 0 | Upstream health check |
-| POST | `/v1/user/data` | 1 | Detailed user data |
-| POST | `/v1/user/region` | 1 | Region / rank |
-| POST | `/v1/user/music` | 2 | All chart scores (large) |
-| POST | `/v1/user/charge` | 1 | Ticket / charge query (read-only) |
-| GET | `/v1/charge/queue` | 0 | Your filtered charge queue |
-| POST | `/v1/charge` | 10 | Enqueue charge task |
-| POST | `/v1/update-lx` | 5 | Upload scores to Lxns |
-| POST | `/v1/update-fish` | 5 | Upload scores to DivingFish |
+|--------|------|------|-------|
+| GET | `/v1/health` | 0 | Connectivity (ping) |
+| POST | `/v1/user/data` | 1 | User data |
+| POST | `/v1/user/region` | 1 | Region records |
+| POST | `/v1/user/music` | 2 | All scores |
+| POST | `/v1/user/charge` | 1 | Owned Charges (read-only) |
+| GET | `/v1/charge/queue` | 0 | **Stub**: no real queue; empty `tasks` |
+| POST | `/v1/charge` | 10 | Buy one Charge (`charge` or `chargeId`) |
+| POST | `/v1/update-lx` | 5 | LXNS sync (`key`+`qrcode`; ignore legacy `type`) |
+| POST | `/v1/update-fish` | 5 | Diving-Fish sync |
 
-### Charge binding & queue
+### 2.2 New paths
 
-1. `POST /v1/charge` requires `qrcode` and `charge`.
-2. After a successful enqueue, the gateway calls `user/data` with the same `qrcode` (**free**) to resolve `userId` and bind it to your gateway account.
-3. `GET /v1/charge/queue` returns **only** tasks for your bound `userId`, with `qrToken` removed.
+| Method | Path | Cost | Notes |
+|--------|------|------|-------|
+| POST | `/v1/user/preview` | 1 | Preview |
+| POST | `/v1/user/item-list` | 1 | Items |
+| POST | `/v1/user/kaleidx-scope` | 1 | Read Gate state |
+| POST | `/v1/music/upsert` | 5 | Upsert 1–4 scores |
+| POST | `/v1/music/delete` | 5 | Delete 1–4 scores |
+| POST | `/v1/item/upsert` | 5 | Item write (**high risk**) |
+| POST | `/v1/ticket/clear` | 5 | Clear Charges |
+| POST | `/v1/kaleidx-scope/upsert` | 5 | Gate edit (**high risk**) |
+| POST | `/v1/user/upsert-all` | 10 | Combined write (**high risk**) |
 
-## 3. Interactive Demos
+### Charge / queue behavior change
 
-Set a valid token under **Auth**, then run the demos below.
+1. `POST /v1/charge` buys a Charge directly (not enqueue).
+2. `GET /v1/charge/queue` remains but has **no real tasks**.
+3. Use `POST /v1/user/charge` to list owned tickets.
 
-### 3.1 Health (free)
+## 3. Interactive demos
+
+### 3.1 Health
 
 <ApiDemo 
   :options="[
     {
-      title: 'Health check',
+      title: 'Health',
       method: 'GET',
       path: '/v1/health',
-      description: 'Probe upstream availability. No charge.',
-      response: { code: 0 }
+      description: 'Free connectivity check. returnCode=0 on success; also code=0.',
+      response: { returnCode: 0, returnMessage: 'pong', code: 0, msg: 'pong' }
     }
   ]"
 />
 
-### 3.2 User queries (billed / JSON body)
-
-All **POST** with body field **`qrcode`**.
+### 3.2 User reads
 
 <ApiDemo 
   :options="[
     {
-      title: 'User detailed data',
+      title: 'User data',
       method: 'POST',
       path: '/v1/user/data',
       paramsIn: 'json',
-      description: 'Costs 1 Token. msg is often a JSON string (parse twice); includes userId, userData, etc.',
+      description: 'Costs 1 Token. returnCode=1 on success.',
       params: [
-        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text (SGWCMAID... or official URL)', value: '' }
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
-      response: { code: 0, msg: '{&quot;userId&quot;: 13699208, &quot;userData&quot;: {}}' }
+      response: { returnCode: 1, code: 0, businessData: { userId: 13699208 } }
     },
     {
-      title: 'Region / rank',
+      title: 'Preview',
+      method: 'POST',
+      path: '/v1/user/preview',
+      paramsIn: 'json',
+      description: 'Costs 1 Token.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: 'Region',
       method: 'POST',
       path: '/v1/user/region',
       paramsIn: 'json',
-      description: 'Costs 1 Token. msg may need a second parse.',
+      description: 'Costs 1 Token.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
-      response: { code: 0, msg: '{}' }
+      response: { returnCode: 1, code: 0 }
     },
     {
-      title: 'All chart scores',
+      title: 'All scores',
       method: 'POST',
       path: '/v1/user/music',
       paramsIn: 'json',
-      description: 'Costs 2 Tokens. Large payload; msg may need a second parse.',
+      description: 'Costs 2 Tokens. Large response.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
-      response: { code: 0, msg: '[]' }
+      response: { returnCode: 1, code: 0 }
     },
     {
-      title: 'Ticket / charge query',
+      title: 'Owned Charges',
       method: 'POST',
       path: '/v1/user/charge',
       paramsIn: 'json',
-      description: 'Costs 1 Token. Read-only ticket / charge info.',
+      description: 'Costs 1 Token. Read-only owned tickets, not the shop catalog.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
-      response: { code: 0 }
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: 'Item list',
+      method: 'POST',
+      path: '/v1/user/item-list',
+      paramsIn: 'json',
+      description: 'Costs 1 Token.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: 'Kaleidx Gate (read)',
+      method: 'POST',
+      path: '/v1/user/kaleidx-scope',
+      paramsIn: 'json',
+      description: 'Costs 1 Token. Read-only.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
+      ],
+      response: { returnCode: 1, code: 0, businessData: { userKaleidxScopeList: [] } }
     }
   ]"
 />
 
-### 3.3 Charge enqueue & queue
+### 3.3 Buy Charge & queue stub
 
 <ApiDemo 
   :options="[
     {
-      title: 'Enqueue charge',
+      title: 'Buy Charge',
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: 'Costs 10 Tokens. Enqueues a charge job and binds mai userId. Do not send unless intended.',
+      description: 'Costs 10 Tokens. Maps to upsert-ticket; charge or chargeId. May be slow.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' },
-        { name: 'charge', type: 'integer', required: 'Required', desc: 'Charge amount / tier per upstream', value: 5 }
+        { name: 'chargeId', type: 'integer', required: 'Required', desc: 'Charge ID (alias: charge)', value: 6 }
       ],
-      response: { code: 0, boundMaiUserId: '13699208' }
+      response: { returnCode: 1, code: 0 }
     },
     {
-      title: 'Charge queue',
+      title: 'Charge queue (stub)',
       method: 'GET',
       path: '/v1/charge/queue',
-      description: 'Free. Only tasks for your bound userId; qrToken stripped. Empty if you never charged.',
-      response: { code: 0, tasks: [], workers: 1 }
+      description: 'Free. No real queue under v2; empty tasks.',
+      response: { code: 0, returnCode: 1, tasks: [], workers: 0, msg: 'No charge queue on upstream v2' }
     }
   ]"
 />
 
-### 3.4 Score upload (billed / JSON body)
+### 3.4 Score writes
 
 <ApiDemo 
   :options="[
     {
-      title: 'Upload to Lxns',
+      title: 'Upsert scores',
+      method: 'POST',
+      path: '/v1/music/upsert',
+      paramsIn: 'json',
+      description: 'Costs 5 Tokens. musicList length 1–4; fuzzy or exact mode.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
+        { name: 'musicList', type: 'array', required: 'Required', desc: 'Scores', value: [{ musicId: 799, level: 4, achievement: 100.5, dxScore: 3, comboStatus: 'ap', syncStatus: 'fdx', fuzzy: true }] }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: 'Delete scores',
+      method: 'POST',
+      path: '/v1/music/delete',
+      paramsIn: 'json',
+      description: 'Costs 5 Tokens. Each item: musicId + level only.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
+        { name: 'musicList', type: 'array', required: 'Required', desc: 'To delete', value: [{ musicId: 799, level: 4 }] }
+      ],
+      response: { returnCode: 1, code: 0 }
+    }
+  ]"
+/>
+
+### 3.5 High-risk writes
+
+<ApiDemo 
+  :options="[
+    {
+      title: 'Gate edit (high risk)',
+      method: 'POST',
+      path: '/v1/kaleidx-scope/upsert',
+      paramsIn: 'json',
+      description: 'Costs 5 Tokens. HIGH RISK: may irreversibly damage the account.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
+        { name: 'gateId', type: 'integer', required: 'Required', desc: 'Gate ID', value: 7 },
+        { name: 'isKeyFound', type: 'boolean', required: 'Optional', desc: 'At least one status field', value: true }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: 'Item upsert (risky kinds)',
+      method: 'POST',
+      path: '/v1/item/upsert',
+      paramsIn: 'json',
+      description: 'Costs 5 Tokens. HIGH RISK for itemKind 4/8/15.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
+        { name: 'itemKind', type: 'integer', required: 'Required', desc: 'Avoid unverified 4/8/15', value: 2 },
+        { name: 'itemId', type: 'integer', required: 'Required', desc: 'Target ID', value: 11 },
+        { name: 'operation', type: 'string', required: 'Required', desc: 'add or del', value: 'add' }
+      ],
+      response: { returnCode: 1, code: 0 }
+    }
+  ]"
+/>
+
+### 3.6 Third-party sync
+
+<ApiDemo 
+  :options="[
+    {
+      title: 'Upload to LXNS',
       method: 'POST',
       path: '/v1/update-lx',
       paramsIn: 'json',
-      description: 'Costs 5 Tokens. Do not send unless intended.',
+      description: 'Costs 5 Tokens.',
       params: [
-        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' },
-        { name: 'key', type: 'string', required: 'Required', desc: 'Lxns key / friend code per upstream', value: '' },
-        { name: 'type', type: 'string', required: 'Required', desc: 'Type, e.g. maimai', value: 'maimai' }
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
+        { name: 'key', type: 'string', required: 'Required', desc: 'LXNS X-User-Token', value: '' }
       ],
-      response: { code: 0 }
+      response: { returnCode: 1, code: 0 }
     },
     {
       title: 'Upload to DivingFish',
       method: 'POST',
       path: '/v1/update-fish',
       paramsIn: 'json',
-      description: 'Costs 5 Tokens. Do not send unless intended.',
+      description: 'Costs 5 Tokens.',
       params: [
-        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' },
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
         { name: 'token', type: 'string', required: 'Required', desc: 'DivingFish Import-Token', value: '' }
       ],
-      response: { code: 0 }
+      response: { returnCode: 1, code: 0 }
     }
   ]"
 />
 
-## 4. Public JSON Catalog
+## 4. Public JSON catalog
 
 ```http
 GET https://api.wmc.pub/api/docs
 ```
 
-Returns path, method, **cost**, and short descriptions for scripting.
-
-## 5. Usage & Failure Rate
-
-### 5.1 Usage stats (auth required)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/me/usage` | Paginated call log (`limit` / `offset`) |
-| GET | `/me/usage/stats` | Daily aggregates; `days` = `7` / `14` / `30` (default 7) |
-
-### 5.2 Failure rate (30-minute buckets)
+## 5. Usage & failure rate
 
 | Method | Path | Auth | Scope |
 |--------|------|------|-------|
-| GET | `/usage/failure-rate` | **None** | **Site-wide** |
-| GET | `/me/usage/failure-rate` | Bearer token | Current user |
+| GET | `/me/usage` | Bearer | Personal log |
+| GET | `/me/usage/stats` | Bearer | Daily stats |
+| GET | `/usage/failure-rate` | None | Site-wide, 7d / 30m buckets |
+| GET | `/me/usage/failure-rate` | Bearer | Personal failure rate |
 
-```http
-GET https://api.wmc.pub/usage/failure-rate
-GET https://api.wmc.pub/me/usage/failure-rate
-```
+`codeZero` counts business success (`returnCode` 0 for ping, 1 otherwise).
 
-- **Window**: fixed last **7 days**
-- **Resolution**: fixed **30-minute** buckets (336 points; empty buckets filled with zeros)
-- **Scope field**: response includes `scope`: `global` (site-wide) or `user` (personal)
-- **Logged field**: `upstreamCode` from response body (`code`, else `returnCode` / `returncode`)
+## 6. Common errors
 
-**Definitions**
-
-| Field | Meaning |
-|-------|---------|
-| `codeZero` | `upstreamCode === 0` (business success) |
-| `businessFail` | HTTP 2xx with non-zero `upstreamCode` |
-| `serverError` | `httpStatus === 0` (forwarding error) or `httpStatus >= 500` |
-| `clientError` | HTTP 4xx |
-| `successRate` | `codeZero / calls` |
-| `failureRate` | `(businessFail + serverError) / calls` |
-
-**Sample response (truncated)**
-
-```json
-{
-  "scope": "global",
-  "days": 7,
-  "bucketMinutes": 30,
-  "since": "2026-07-14T06:00:00.000Z",
-  "until": "2026-07-21T05:30:00.000Z",
-  "series": [
-    {
-      "ts": "2026-07-14T06:00:00.000Z",
-      "bucketUnix": 1720936800,
-      "calls": 12,
-      "codeZero": 10,
-      "businessFail": 1,
-      "serverError": 1,
-      "clientError": 0,
-      "successRate": 0.8333,
-      "failureRate": 0.1667
-    }
-  ],
-  "summary": {
-    "calls": 1200,
-    "codeZero": 1100,
-    "businessFail": 50,
-    "serverError": 30,
-    "clientError": 20,
-    "successRate": 0.9167,
-    "failureRate": 0.0667
-  }
-}
-```
-
-::: tip Note
-Logs written before this feature may lack `upstreamCode`; they will not count toward `codeZero` / `businessFail`, but may still contribute to `serverError` / `clientError` via HTTP status.  
-Admins can also call `GET /admin/usage/failure-rate` (same data as the site-wide endpoint).
-:::
-
-## 6. Common Errors
-
-| HTTP | Meaning |
+| HTTP / returnCode | Meaning |
 |------|---------|
-| **401** | Missing or invalid token |
-| **403** | Insufficient balance, etc. |
-| **404** | Unknown path |
-| **500** | Forwarding / misconfiguration; see `msg` |
-| **5xx** | Retry later |
+| **401** | Missing/invalid token |
+| **403** | Insufficient balance |
+| **4001** etc. | Upstream business errors (see `returnMessage`) |
+| **500 / 502** | Forwarding or decode failure |
 
 ::: tip Tips
-Start with **`/v1/health`** (free). Use **`/v1/charge`** then **`/v1/charge/queue`** to track top-ups.  
-Legacy paths such as `/v1/get_preview` and `/v1/upload_b50` are **removed**—use the table above.
+Start with **`/v1/health`**. Buy tickets with **`/v1/charge`**; do not rely on **`/v1/charge/queue`**. Never log QR codes or third-party tokens.
 :::

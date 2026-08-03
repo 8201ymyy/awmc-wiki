@@ -3,7 +3,7 @@ apiBaseUrl: https://api.wmc.pub
 ---
 # 🔌 AWMC 网关公共 API（计费说明）
 
-面向**使用者**：如何调用开放接口，以及 **Token 何时会扣费**。本文不讨论内部实现。
+面向**使用者**：如何调用开放接口，以及 **Token 何时会扣费**。本文不讨论上游编解码实现。
 
 ::: tip 平台地址
 平台地址：https://api.wmc.pub
@@ -30,36 +30,73 @@ apiBaseUrl: https://api.wmc.pub
 机台 `keychip` 由网关服务端注入，**调用方无需也不应传递**。请求体只需提供业务参数（如 `qrcode`）。
 :::
 
-## 1. 服务地址与路径
+::: danger 高风险操作（必读）
+以下操作**极可能对账号产生不可逆转的严重后果**，请勿随意调用：
+
+1. **改门**：`POST /v1/kaleidx-scope/upsert`（修改 Kaleidx Scope Gate 状态）。
+2. **未验证收藏品写入**：通过 `POST /v1/item/upsert` 或 `POST /v1/user/upsert-all` 发送 **`itemKind` 为 `4`、`8`、`15`** 的道具/钥匙类数据。
+
+网关不会替你拦截这些请求；调用即视为自行承担风险。
+:::
+
+## 1. 服务地址与路径兼容
 
 所有业务路径接在 **网关根地址** 之后，前缀为 **`/v1`**。
 
-- **GET**：一般无 Body（如健康检查、充值队列）。
-- **POST**：使用 **JSON Body**，请求头加 `Content-Type: application/json`。
-- 上游响应多为 `{ "code": 0, "msg": "..." }`；部分接口的 `msg` 为 **JSON 字符串**，需二次 `JSON.parse`。
+- 上游已升级为 **PyMai API v2**；**对外路由尽量保持旧路径不变**（例如仍用 `/v1/user/data`）。
+- **POST**：使用 **明文 JSON Body**（`Content-Type: application/json`）。zlib / Base64 由网关处理。
+- 响应同时包含：
+  - 上游字段：`returnCode`、`returnMessage`（成功时可能附带 `businessData`）
+  - 兼容字段：业务成功时 **`code === 0`**，`msg` 尽量可二次 `JSON.parse`
+
+**成功判定（扣费与业务）**
+
+| 接口 | 上游成功条件 |
+|------|----------------|
+| `GET /v1/health` | `returnCode === 0`（ping） |
+| 其它业务 | `returnCode === 1` |
+
+建议新客户端以 `returnCode` 为准；旧客户端可读 `code === 0`。
 
 ## 2. Token 计费规则
 
-- 下表 **「消耗」**：本次请求在 **HTTP 2xx** 且上游业务成功（通常为 **`code === 0`**）时扣除的 Token；**0** 表示不扣费。
+- 下表 **「消耗」**：本次请求在 **HTTP 2xx** 且上游业务成功时扣除的 Token；**0** 表示不扣费。
 - 余额不足返回 **403** `Insufficient balance`。
+- 建议客户端超时 **180** 秒（购买 Charge 等写入更慢）。
+
+### 2.1 兼容旧路径
 
 | 方法 | 路径 | 消耗 | 说明 |
 |------|------|------|------|
-| GET | `/v1/health` | 0 | 上游健康检查 |
-| POST | `/v1/user/data` | 1 | 用户详细数据 |
-| POST | `/v1/user/region` | 1 | 地区 / 段位 |
-| POST | `/v1/user/music` | 2 | 全部谱面成绩（体积较大） |
-| POST | `/v1/user/charge` | 1 | 发票 / 票券查询（只读） |
-| GET | `/v1/charge/queue` | 0 | 本人充值队列（已过滤、脱敏） |
-| POST | `/v1/charge` | 10 | 发票充值入队 |
-| POST | `/v1/update-lx` | 5 | 上传成绩到落雪 LX |
-| POST | `/v1/update-fish` | 5 | 上传成绩到 DivingFish |
+| GET | `/v1/health` | 0 | 连通检查（映射 ping） |
+| POST | `/v1/user/data` | 1 | 用户基础数据 |
+| POST | `/v1/user/region` | 1 | 地区记录 |
+| POST | `/v1/user/music` | 2 | 全部成绩 |
+| POST | `/v1/user/charge` | 1 | 已持有 Charge（只读） |
+| GET | `/v1/charge/queue` | 0 | **占位**：上游已无真实队列，固定返回空 `tasks` |
+| POST | `/v1/charge` | 10 | 购买一张 Charge（`charge` 或 `chargeId`） |
+| POST | `/v1/update-lx` | 5 | 同步到落雪 LXNS（`key`+`qrcode`；旧字段 `type` 可忽略） |
+| POST | `/v1/update-fish` | 5 | 同步到 Diving-Fish（`token`+`qrcode`） |
 
-### 充值绑定与队列
+### 2.2 新增路径
 
-1. 调用 `POST /v1/charge` 时需提供 `qrcode` 与 `charge`。
-2. 入队成功后，网关会用同一 `qrcode` 请求 `user/data`（**不计费**），解析 `userId` 并与当前网关账号绑定。
-3. 之后 `GET /v1/charge/queue` **只返回**与你绑定的 `userId` 相关任务，并去除敏感字段 `qrToken`。
+| 方法 | 路径 | 消耗 | 说明 |
+|------|------|------|------|
+| POST | `/v1/user/preview` | 1 | 用户预览 |
+| POST | `/v1/user/item-list` | 1 | 道具列表 |
+| POST | `/v1/user/kaleidx-scope` | 1 | 读取 Gate 状态 |
+| POST | `/v1/music/upsert` | 5 | 上传/覆盖 1–4 条成绩 |
+| POST | `/v1/music/delete` | 5 | 删除 1–4 条成绩 |
+| POST | `/v1/item/upsert` | 5 | 添加/删除道具（**高风险见上文**） |
+| POST | `/v1/ticket/clear` | 5 | 清空 Charge |
+| POST | `/v1/kaleidx-scope/upsert` | 5 | 改门（**高风险见上文**） |
+| POST | `/v1/user/upsert-all` | 10 | 合并写入（**高风险见上文**） |
+
+### 充值 / 票券行为变更
+
+1. `POST /v1/charge` 不再「入队」，而是直接购买 Charge；Body 可用 `charge` 或 `chargeId`。
+2. `GET /v1/charge/queue` 保留路径但**无真实任务**；请勿依赖队列状态轮询。
+3. 查询已持有票券请用 `POST /v1/user/charge`。
 
 ## 3. 开放接口调试
 
@@ -73,92 +110,190 @@ apiBaseUrl: https://api.wmc.pub
       title: '健康检查',
       method: 'GET',
       path: '/v1/health',
-      description: '探测上游是否可用，不产生扣费。',
-      response: { code: 0 }
+      description: '探测上游是否可用，不产生扣费。成功时 returnCode=0，并双写 code=0。',
+      response: { returnCode: 0, returnMessage: 'pong', code: 0, msg: 'pong' }
     }
   ]"
 />
 
 ### 3.2 用户查询（计费 / JSON Body）
 
-以下接口均为 **POST**，Body 字段 **`qrcode`**（二维码文本，如 `SGWCMAID...`）。
+以下接口均为 **POST**，Body 字段 **`qrcode`**。
 
 <ApiDemo 
   :options="[
     {
-      title: '用户详细数据',
+      title: '用户基础数据',
       method: 'POST',
       path: '/v1/user/data',
       paramsIn: 'json',
-      description: '消耗 1 Token。msg 常为 JSON 字符串，需二次解析；内含 userId、userData 等。',
+      description: '消耗 1 Token。成功 returnCode=1；msg / businessData 含业务 JSON。',
       params: [
-        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容（SGWCMAID... 或官方链接）', value: '' }
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
-      response: { code: 0, msg: '{&quot;userId&quot;: 13699208, &quot;userData&quot;: {}}' }
+      response: { returnCode: 1, code: 0, businessData: { userId: 13699208 } }
     },
     {
-      title: '地区 / 段位',
+      title: '用户预览',
+      method: 'POST',
+      path: '/v1/user/preview',
+      paramsIn: 'json',
+      description: '消耗 1 Token。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: '地区记录',
       method: 'POST',
       path: '/v1/user/region',
       paramsIn: 'json',
-      description: '消耗 1 Token。查询地区与段位信息；msg 可能需二次解析。',
+      description: '消耗 1 Token。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
-      response: { code: 0, msg: '{}' }
+      response: { returnCode: 1, code: 0 }
     },
     {
-      title: '全部谱面成绩',
+      title: '全部成绩',
       method: 'POST',
       path: '/v1/user/music',
       paramsIn: 'json',
-      description: '消耗 2 Token。返回体积较大；msg 可能需二次解析。',
+      description: '消耗 2 Token。响应体积较大。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
-      response: { code: 0, msg: '[]' }
+      response: { returnCode: 1, code: 0 }
     },
     {
-      title: '发票 / 票券查询',
+      title: '已持有 Charge',
       method: 'POST',
       path: '/v1/user/charge',
       paramsIn: 'json',
-      description: '消耗 1 Token。只读查询用户发票与票券信息。',
+      description: '消耗 1 Token。只读查询已持有票券，不是商店列表。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
-      response: { code: 0 }
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: '道具列表',
+      method: 'POST',
+      path: '/v1/user/item-list',
+      paramsIn: 'json',
+      description: '消耗 1 Token。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: 'Kaleidx Gate 状态（只读）',
+      method: 'POST',
+      path: '/v1/user/kaleidx-scope',
+      paramsIn: 'json',
+      description: '消耗 1 Token。只读；改门请见高风险接口。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
+      ],
+      response: { returnCode: 1, code: 0, businessData: { userKaleidxScopeList: [] } }
     }
   ]"
 />
 
-### 3.3 发票充值与队列
+### 3.3 购买 Charge 与队列占位
 
 <ApiDemo 
   :options="[
     {
-      title: '充值入队',
+      title: '购买 Charge',
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: '消耗 10 Token。加入发票充值队列；成功后会绑定 mai userId。请确认后再发送。',
+      description: '消耗 10 Token。映射 upsert-ticket；可用 charge 或 chargeId。耗时可能较长。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' },
-        { name: 'charge', type: 'integer', required: '必填', desc: '充值张数 / 档位（按上游约定）', value: 5 }
+        { name: 'chargeId', type: 'integer', required: '必填', desc: 'Charge ID（也可用字段名 charge）', value: 6 }
       ],
-      response: { code: 0, boundMaiUserId: '13699208' }
+      response: { returnCode: 1, code: 0 }
     },
     {
-      title: '充值队列查询',
+      title: '充值队列（占位）',
       method: 'GET',
       path: '/v1/charge/queue',
-      description: '不计费。仅返回当前账号已绑定 userId 的任务；不含 qrToken。未充值绑定过则 tasks 为空。',
-      response: { code: 0, tasks: [], workers: 1 }
+      description: '不计费。上游 v2 已无真实队列，返回空 tasks。',
+      response: { code: 0, returnCode: 1, tasks: [], workers: 0, msg: '上游 v2 已无充值队列' }
     }
   ]"
 />
 
-### 3.4 成绩上传（计费 / JSON Body）
+### 3.4 成绩写入
+
+<ApiDemo 
+  :options="[
+    {
+      title: '上传成绩',
+      method: 'POST',
+      path: '/v1/music/upsert',
+      paramsIn: 'json',
+      description: '消耗 5 Token。musicList 1–4 条；支持 fuzzy 精确/模糊模式。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
+        { name: 'musicList', type: 'array', required: '必填', desc: '成绩数组', value: [{ musicId: 799, level: 4, achievement: 100.5, dxScore: 3, comboStatus: 'ap', syncStatus: 'fdx', fuzzy: true }] }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: '删除成绩',
+      method: 'POST',
+      path: '/v1/music/delete',
+      paramsIn: 'json',
+      description: '消耗 5 Token。每项仅 musicId + level。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
+        { name: 'musicList', type: 'array', required: '必填', desc: '待删成绩', value: [{ musicId: 799, level: 4 }] }
+      ],
+      response: { returnCode: 1, code: 0 }
+    }
+  ]"
+/>
+
+### 3.5 高风险写入（请先阅读顶部警告）
+
+<ApiDemo 
+  :options="[
+    {
+      title: '改门（高风险）',
+      method: 'POST',
+      path: '/v1/kaleidx-scope/upsert',
+      paramsIn: 'json',
+      description: '消耗 5 Token。【高风险】改门极可能对账号造成不可逆严重后果。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
+        { name: 'gateId', type: 'integer', required: '必填', desc: '门 ID', value: 7 },
+        { name: 'isKeyFound', type: 'boolean', required: '选填', desc: '状态字段至少一项', value: true }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: '道具写入（高风险种类）',
+      method: 'POST',
+      path: '/v1/item/upsert',
+      paramsIn: 'json',
+      description: '消耗 5 Token。【高风险】itemKind 为 4/8/15 时极可能对账号造成不可逆严重后果。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
+        { name: 'itemKind', type: 'integer', required: '必填', desc: '种类；避免未验证的 4/8/15', value: 2 },
+        { name: 'itemId', type: 'integer', required: '必填', desc: '目标 ID', value: 11 },
+        { name: 'operation', type: 'string', required: '必填', desc: 'add 或 del', value: 'add' }
+      ],
+      response: { returnCode: 1, code: 0 }
+    }
+  ]"
+/>
+
+### 3.6 成绩上传到第三方
 
 <ApiDemo 
   :options="[
@@ -167,25 +302,24 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/update-lx',
       paramsIn: 'json',
-      description: '消耗 5 Token。请确认后再发送。',
+      description: '消耗 5 Token。',
       params: [
-        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' },
-        { name: 'key', type: 'string', required: '必填', desc: '落雪相关密钥 / 好友码等（按上游要求）', value: '' },
-        { name: 'type', type: 'string', required: '必填', desc: '类型，如 maimai', value: 'maimai' }
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
+        { name: 'key', type: 'string', required: '必填', desc: 'LXNS X-User-Token', value: '' }
       ],
-      response: { code: 0 }
+      response: { returnCode: 1, code: 0 }
     },
     {
       title: '上传到 DivingFish',
       method: 'POST',
       path: '/v1/update-fish',
       paramsIn: 'json',
-      description: '消耗 5 Token。请确认后再发送。',
+      description: '消耗 5 Token。',
       params: [
-        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' },
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
         { name: 'token', type: 'string', required: '必填', desc: '水鱼 Import-Token', value: '' }
       ],
-      response: { code: 0 }
+      response: { returnCode: 1, code: 0 }
     }
   ]"
 />
@@ -196,7 +330,7 @@ apiBaseUrl: https://api.wmc.pub
 GET https://api.wmc.pub/api/docs
 ```
 
-返回各路径、方法、**消耗** 与简要说明，便于脚本读取。
+返回各路径、方法、**消耗** 与简要说明（含风险提示文案）。
 
 ## 5. 调用用量与失败率
 
@@ -204,88 +338,29 @@ GET https://api.wmc.pub/api/docs
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/me/usage` | 本人调用明细分页（`limit` / `offset`） |
-| GET | `/me/usage/stats` | 本人日粒度统计；`days` 可选 `7` / `14` / `30`（默认 7） |
+| GET | `/me/usage` | 本人调用明细分页 |
+| GET | `/me/usage/stats` | 本人日粒度统计；`days`=7/14/30 |
 
 ### 5.2 失败率（半小时精度）
 
 | 方法 | 路径 | 鉴权 | 范围 |
 |------|------|------|------|
-| GET | `/usage/failure-rate` | **无需** | **全站** |
-| GET | `/me/usage/failure-rate` | Bearer 令牌 | 本人 |
+| GET | `/usage/failure-rate` | 无需 | 全站 |
+| GET | `/me/usage/failure-rate` | Bearer | 本人 |
 
-```http
-GET https://api.wmc.pub/usage/failure-rate
-GET https://api.wmc.pub/me/usage/failure-rate
-```
-
-- **窗口**：固定近 **7 天**
-- **精度**：固定 **30 分钟** 一桶（共 336 个点，空桶补 0）
-- **范围字段**：响应含 `scope`：`global`（全站）或 `user`（本人）
-- **写入字段**：调用日志会记录上游业务码 `upstreamCode`（优先解析响应体 `code`，其次 `returnCode` / `returncode`）
-
-**分类定义**
-
-| 字段 | 含义 |
-|------|------|
-| `codeZero` | `upstreamCode === 0`（业务成功） |
-| `businessFail` | HTTP 2xx 且存在 `upstreamCode` 且不为 0 |
-| `serverError` | `httpStatus === 0`（网关转发异常）或 `httpStatus >= 500` |
-| `clientError` | HTTP 4xx |
-| `successRate` | `codeZero / calls` |
-| `failureRate` | `(businessFail + serverError) / calls` |
-
-**响应示例（截断）**
-
-```json
-{
-  "scope": "global",
-  "days": 7,
-  "bucketMinutes": 30,
-  "since": "2026-07-14T06:00:00.000Z",
-  "until": "2026-07-21T05:30:00.000Z",
-  "series": [
-    {
-      "ts": "2026-07-14T06:00:00.000Z",
-      "bucketUnix": 1720936800,
-      "calls": 12,
-      "codeZero": 10,
-      "businessFail": 1,
-      "serverError": 1,
-      "clientError": 0,
-      "successRate": 0.8333,
-      "failureRate": 0.1667
-    }
-  ],
-  "summary": {
-    "calls": 1200,
-    "codeZero": 1100,
-    "businessFail": 50,
-    "serverError": 30,
-    "clientError": 20,
-    "successRate": 0.9167,
-    "failureRate": 0.0667
-  }
-}
-```
-
-::: tip 说明
-本接口上线前的历史日志可能没有 `upstreamCode`，这些记录不会计入 `codeZero` / `businessFail`，但仍可能因 HTTP 状态计入 `serverError` / `clientError`。  
-管理员另可使用 `GET /admin/usage/failure-rate`（与全站接口数据相同）。
-:::
+固定近 7 天、30 分钟一桶。`codeZero` 表示业务成功计数（ping 的 `returnCode=0` 或其它业务的 `1`）。
 
 ## 6. 常见错误
 
-| HTTP | 说明 |
+| HTTP / returnCode | 说明 |
 |------|------|
 | **401** | 令牌缺失或无效 |
 | **403** | 余额不足等 |
-| **404** | 路径或资源不存在 |
-| **500** | 转发失败 / 未配置上游等，见响应 `msg` |
-| **5xx** | 服务异常，可稍后重试 |
+| **4001** 等 | 上游业务错误（如用户正在登录中），见 `returnMessage` |
+| **500 / 502** | 转发或解码失败 |
 
 ::: tip 建议
-先调用 **`/v1/health`**（不扣费）确认地址与令牌；再调用查询类接口。  
-发起充值请用 **`/v1/charge`**，用 **`/v1/charge/queue`** 查看是否成功。  
-旧路径（如 `/v1/get_preview`、`/v1/upload_b50`）已移除，请改用上表新路径。
+先调用 **`/v1/health`**；再调用查询类接口。  
+购买票券用 **`/v1/charge`**，不要依赖 **`/v1/charge/queue`**。  
+切勿在日志中记录二维码与第三方 Token。
 :::

@@ -29,7 +29,7 @@ User data / chart queries, charge enqueue & queue, and score upload (DivingFish 
 :::
 
 - **Authentication**: <Badge type="warning" text="Bearer Token" /> (Must be included in Authorization header)
-- **Token Consumption**: Charged on HTTP success and upstream `code === 0`. See billing details.
+- **Token Consumption**: Charged on HTTP success and upstream business success (`returnCode===1`, or `0` for health/ping). Public paths stay mostly compatible with legacy `/v1/*`.
 - **Documentation**: [View AWMC Public API Details](/en/dev/awmc-api)
 
 ## Assets Static Resource API (Base URL: `{{ $frontmatter.assetsApiBaseUrl }}`)
