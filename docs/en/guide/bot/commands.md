@@ -79,6 +79,7 @@ If historical data has no redeemer record, an admin can use **`/mai admin cancel
 | `/maiping` | Test arcade connection. |
 | `/mai预览` | Query the account preview; costs 5 BREAK on success. |
 | `/mai道具` | Query owned items; costs 5 BREAK on success. |
+| `/mai门状态` / `/mai查门` | Query Kaleidx Gate discovery, key, and clear status; costs 5 BREAK on success. |
 
 ### 5.2 Diving Fish B50
 
