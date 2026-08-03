@@ -43,7 +43,7 @@ apiBaseUrl: https://api.wmc.pub
 
 所有业务路径接在 **网关根地址** 之后，前缀为 **`/v1`**。
 
-- 上游已升级为 **PyMai API v2**；**对外路由尽量保持旧路径不变**（例如仍用 `/v1/user/data`）。
+- 上游已升级为 **AWMC API v2**；**对外路由尽量保持旧路径不变**（例如仍用 `/v1/user/data`）。
 - **POST**：使用 **明文 JSON Body**（`Content-Type: application/json`）。zlib / Base64 由网关处理。
 - 响应同时包含：
   - 上游字段：`returnCode`、`returnMessage`（成功时可能附带 `businessData`）

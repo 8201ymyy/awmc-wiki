@@ -43,7 +43,7 @@ The gateway does **not** block these requests; you accept the risk by calling th
 
 All business paths are under **`/v1`** on the gateway.
 
-- Upstream is **PyMai API v2**; **public paths stay as close as possible to the old ones** (e.g. still `/v1/user/data`).
+- Upstream is **AWMC API v2**; **public paths stay as close as possible to the old ones** (e.g. still `/v1/user/data`).
 - **POST** with **plain JSON** (`Content-Type: application/json`). zlib/Base64 is handled by the gateway.
 - Responses include:
   - Upstream: `returnCode`, `returnMessage` (and `businessData` when applicable)
@@ -222,19 +222,81 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
   ]"
 />
 
-### 3.4 Score writes
+### 3.4 Score writes (upload charts) — details
+
+> Do **not** confuse with `POST /v1/user/music` (**read** all scores).  
+> **Write/overwrite** → `POST /v1/music/upsert`; **delete** → `POST /v1/music/delete`.
+
+#### What one request does
+
+- Body: `qrcode` + `musicList` (array length **1–4**).
+- Each item is uniquely identified by **`(musicId, level)`**.
+- Costs **5 Tokens**; success when upstream `returnCode === 1`.
+
+#### `level`
+
+| Value | Difficulty |
+|---:|------|
+| 0 | BASIC |
+| 1 | ADVANCED |
+| 2 | EXPERT |
+| 3 | MASTER |
+| 4 | Re:MASTER |
+| 10 | UTAGE |
+
+#### Exact vs fuzzy (`fuzzy`) — easy to get wrong
+
+| Mode | `fuzzy` | `achievement` | Meaning of `dxScore` |
+|------|---------|---------------|----------------------|
+| **Exact** | `false` | Target rate, e.g. `100.9444` | **Actual DX score** (e.g. `2947`) |
+| **Fuzzy** | `true` | **Minimum** desired rate | **DX star 0–5** (not the raw DX score!) |
+
+Fuzzy stars: `0` none · `1` ≥85% · `2` ≥90% · `3` ≥93% · `4` ≥95% · `5` ≥97% of chart max DX.
+
+#### Minimal exact example
+
+```json
+{
+  "qrcode": "SGWCMAID...",
+  "musicList": [
+    {
+      "musicId": 11479,
+      "level": 3,
+      "achievement": 100.5,
+      "dxScore": 2100,
+      "comboStatus": "ap",
+      "syncStatus": "fsd",
+      "fuzzy": false
+    }
+  ]
+}
+```
+
+More detail: [API Reference / Swagger](/en/dev/api-docs) → **Score → `/v1/music/upsert`**.
 
 <ApiDemo 
   :options="[
     {
-      title: 'Upsert scores',
+      title: 'Upsert scores (exact)',
       method: 'POST',
       path: '/v1/music/upsert',
       paramsIn: 'json',
-      description: 'Costs 5 Tokens. musicList length 1–4; fuzzy or exact mode.',
+      description: 'Costs 5 Tokens. fuzzy=false: dxScore is the real DX score. 1–4 items.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
-        { name: 'musicList', type: 'array', required: 'Required', desc: 'Scores', value: [{ musicId: 799, level: 4, achievement: 100.5, dxScore: 3, comboStatus: 'ap', syncStatus: 'fdx', fuzzy: true }] }
+        { name: 'musicList', type: 'array', required: 'Required', desc: 'Scores', value: [{ musicId: 11479, level: 3, achievement: 100.5, dxScore: 2100, comboStatus: 'ap', syncStatus: 'fsd', fuzzy: false }] }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: 'Upsert scores (fuzzy stars)',
+      method: 'POST',
+      path: '/v1/music/upsert',
+      paramsIn: 'json',
+      description: 'fuzzy=true: dxScore is star 0–5, not the raw DX score.',
+      params: [
+        { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
+        { name: 'musicList', type: 'array', required: 'Required', desc: 'Scores', value: [{ musicId: 11176, level: 2, achievement: 100.0, dxScore: 3, comboStatus: 'fcp', syncStatus: 'fsp', fuzzy: true }] }
       ],
       response: { returnCode: 1, code: 0 }
     },
