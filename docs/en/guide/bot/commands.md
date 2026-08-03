@@ -81,6 +81,9 @@ If historical data has no redeemer record, an admin can use **`/mai admin cancel
 | `/mai道具` / `/道具` | Query owned items; costs 5 BREAK on success. |
 | `/mai门状态` / `/查门` / `/门状态` | Query Kaleidx Gate discovery, key, and clear status; costs 5 BREAK on success. |
 
+Gate status includes the names: 1 Blue Gate, 2 White Gate, 3 Purple Gate, 4 Black Gate,
+5 Yellow Gate, 6 Red Gate, 7 Prism Tower, 8 Outer Gate, 9 Gate of Hope, and 10 Inner Gate.
+
 ### 5.2 Diving Fish B50
 
 | Command | Description |
