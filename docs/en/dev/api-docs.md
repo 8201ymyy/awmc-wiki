@@ -1,6 +1,15 @@
 # Interactive API Reference
 
-Select a service to inspect its endpoints, request parameters, and response schemas, or send a test request directly.
+Select a service to inspect endpoints, parameters, and response schemas.
+
+::: tip Uploading scores (music upsert)
+Open **AWMC Gateway API** → tag **Score**:
+
+- `POST /v1/music/upsert` — write/overwrite scores (exact vs fuzzy `dxScore` explained in the operation description)
+- `POST /v1/music/delete` — delete by `musicId` + `level`
+
+Note: `POST /v1/user/music` **reads** all scores; it does not upload. See also [AWMC Public API](/en/dev/awmc-api).
+:::
 
 ::: warning Authentication
 AWMC gateway tokens, Chart Preview API keys, and AWMCNET credentials are not interchangeable. Swagger UI credentials are cleared when you switch services to prevent accidental reuse or exposure.

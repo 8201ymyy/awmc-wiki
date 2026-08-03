@@ -228,19 +228,105 @@ apiBaseUrl: https://api.wmc.pub
   ]"
 />
 
-### 3.4 成绩写入
+### 3.4 成绩写入（传歌曲）— 详细说明
+
+> **不要和** `POST /v1/user/music`（**查询**全部成绩）搞混。  
+> **写入 / 覆盖**请用 `POST /v1/music/upsert`；**删除**用 `POST /v1/music/delete`。
+
+#### 一次请求能干什么？
+
+- Body 里带 `qrcode` + `musicList`（数组）。
+- `musicList` 长度 **1～4**：可以一次写多首歌，也可以同一首歌的多个难度。
+- 每一项用 **`(musicId, level)`** 唯一确定一条谱面成绩。
+- 消耗 **5 Token**；成功条件为上游 `returnCode === 1`。
+
+#### `level`（难度）
+
+| 值 | 难度 |
+|---:|------|
+| 0 | BASIC |
+| 1 | ADVANCED |
+| 2 | EXPERT |
+| 3 | MASTER |
+| 4 | Re:MASTER |
+| 10 | 宴会场 UTAGE |
+
+#### `fuzzy` 两种模式（最容易搞错）
+
+| 模式 | `fuzzy` | `achievement` | `dxScore` 含义 |
+|------|---------|---------------|----------------|
+| **精确** | `false` | 目标达成率，如 `100.9444` | **实际 DX 分数**（如 `2947`） |
+| **模糊** | `true` | 希望达到的**最低**达成率 | **DX 星级 0～5**（不是实际 DX 分！） |
+
+模糊星级对应最低 DX 完成度：`0` 不限 · `1` 85% · `2` 90% · `3` 93% · `4` 95% · `5` 97%。
+
+#### Combo / Sync 常用字符串
+
+- Combo：`none` · `fc` · `fcp` · `ap` · `app`（也可传 0～4）
+- Sync：`none` · `fs` · `fsp` · `fsd`/`fdx` · `fsdp`/`fdxp` · `sync`（也可传 0～5）
+
+#### 最小可用示例（精确模式）
+
+```json
+{
+  "qrcode": "SGWCMAID...",
+  "musicList": [
+    {
+      "musicId": 11479,
+      "level": 3,
+      "achievement": 100.5,
+      "dxScore": 2100,
+      "comboStatus": "ap",
+      "syncStatus": "fsd",
+      "fuzzy": false
+    }
+  ]
+}
+```
+
+#### 模糊模式注意
+
+下面这条里 `dxScore: 3` 表示「至少 3 星 / 约 93% DX 完成度」，**不是** DX 分等于 3：
+
+```json
+{
+  "musicId": 11176,
+  "level": 2,
+  "achievement": 100.0,
+  "dxScore": 3,
+  "comboStatus": "fcp",
+  "syncStatus": "fsp",
+  "fuzzy": true
+}
+```
+
+`musicId` 必须换成当前版本真实存在的曲目 ID，否则上游可能返回 `5004`。
+
+更完整的字段表与示例也可在 [API 调试 / Swagger](/dev/api-docs) 中打开 **Score → `/v1/music/upsert`** 查看。
 
 <ApiDemo 
   :options="[
     {
-      title: '上传成绩',
+      title: '上传成绩（精确）',
       method: 'POST',
       path: '/v1/music/upsert',
       paramsIn: 'json',
-      description: '消耗 5 Token。musicList 1–4 条；支持 fuzzy 精确/模糊模式。',
+      description: '消耗 5 Token。fuzzy=false：dxScore 填实际 DX 分。一次 1～4 条。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
-        { name: 'musicList', type: 'array', required: '必填', desc: '成绩数组', value: [{ musicId: 799, level: 4, achievement: 100.5, dxScore: 3, comboStatus: 'ap', syncStatus: 'fdx', fuzzy: true }] }
+        { name: 'musicList', type: 'array', required: '必填', desc: '成绩数组', value: [{ musicId: 11479, level: 3, achievement: 100.5, dxScore: 2100, comboStatus: 'ap', syncStatus: 'fsd', fuzzy: false }] }
+      ],
+      response: { returnCode: 1, code: 0 }
+    },
+    {
+      title: '上传成绩（模糊星级）',
+      method: 'POST',
+      path: '/v1/music/upsert',
+      paramsIn: 'json',
+      description: 'fuzzy=true：dxScore 填 0～5 星，不是实际 DX 分。',
+      params: [
+        { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
+        { name: 'musicList', type: 'array', required: '必填', desc: '成绩数组', value: [{ musicId: 11176, level: 2, achievement: 100.0, dxScore: 3, comboStatus: 'fcp', syncStatus: 'fsp', fuzzy: true }] }
       ],
       response: { returnCode: 1, code: 0 }
     },
@@ -249,7 +335,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/music/delete',
       paramsIn: 'json',
-      description: '消耗 5 Token。每项仅 musicId + level。',
+      description: '消耗 5 Token。每项只能有 musicId + level。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
         { name: 'musicList', type: 'array', required: '必填', desc: '待删成绩', value: [{ musicId: 799, level: 4 }] }
