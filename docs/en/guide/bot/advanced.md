@@ -85,7 +85,7 @@ See [AWMC BOT Terms of Service & Privacy Policy](/en/guide/bot/terms#10-disclaim
 
 | Command | Description |
 |---------|-------------|
-| `/mai发票 [multiplier] [target]` | Issue function ticket (multiplier 2–6, default 2); 4x+ may fail |
+| `/mai发票 [multiplier] [target]` | Issue a function ticket (2x or 3x; default 2x) |
 | `/mai修改版本号 [QR or target]` | Change game version (cached) |
 | `/mai获取收藏品 [SGID or @user]` | Interactive collectible fetch |
 | `/mai上传乐曲成绩 [@user]` | Interactive single-song score upload |

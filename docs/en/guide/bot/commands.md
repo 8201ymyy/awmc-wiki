@@ -105,7 +105,7 @@ Gate status includes the names: 1 Blue Gate, 2 White Gate, 3 Purple Gate, 4 Blac
 
 | Command | Description |
 |---------|-------------|
-| `/mai ticket [multiplier] [target]` | Issue function ticket (e.g., 2-6x, default 2). |
+| `/mai ticket [multiplier] [target]` | Issue a function ticket (2x or 3x; default 2x). |
 | `/mai change version [QR code or target]` | Change game version number (supports caching). |
 | `/mai get collectibles [SGID or @user]` | Interactively get collectibles. |
 | `/mai upload song score [@user]` | Interactively upload a single song score. |
