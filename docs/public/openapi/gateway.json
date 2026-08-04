@@ -262,7 +262,7 @@
           "Charge"
         ],
         "summary": "购买一张 Charge",
-        "description": "消耗 10 Token。映射 `/upsert-ticket`（不再入队）。字段可用 `charge` 或 `chargeId`。耗时可能较长（上游约 60s 等待）。",
+        "description": "消耗 10 Token。映射 `/upsert-ticket`（不再入队）。字段可用 `charge` 或 `chargeId`（仅允许 chargeId=2 或 chargeId=3）。耗时可能较长（上游约 60s 等待）。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -877,13 +877,21 @@
           },
           "chargeId": {
             "type": "integer",
-            "description": "Charge ID（也可用字段名 charge）",
-            "example": 6
+            "description": "Charge ID（仅允许 chargeId=2 或 chargeId=3；也可用字段名 charge）",
+            "enum": [
+              2,
+              3
+            ],
+            "example": 2
           },
           "charge": {
             "type": "integer",
-            "description": "chargeId 的别名（兼容旧客户端）",
-            "example": 6
+            "description": "chargeId 的别名（仅允许 chargeId=2 或 chargeId=3；兼容旧客户端）",
+            "enum": [
+              2,
+              3
+            ],
+            "example": 2
           }
         }
       },

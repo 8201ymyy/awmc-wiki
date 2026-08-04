@@ -205,10 +205,10 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: 'Costs 10 Tokens. Maps to upsert-ticket; charge or chargeId. May be slow.',
+      description: 'Costs 10 Tokens. Maps to upsert-ticket; charge or chargeId (only chargeId=2 or chargeId=3). May be slow.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' },
-        { name: 'chargeId', type: 'integer', required: 'Required', desc: 'Charge ID (alias: charge)', value: 6 }
+        { name: 'chargeId', type: 'integer', required: 'Required', desc: 'Charge ID (alias: charge; only 2 or 3)', value: 2 }
       ],
       response: { returnCode: 1, code: 0 }
     },

@@ -211,10 +211,10 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: '消耗 10 Token。映射 upsert-ticket；可用 charge 或 chargeId。耗时可能较长。',
+      description: '消耗 10 Token。映射 upsert-ticket；可用 charge 或 chargeId（仅允许 chargeId=2 或 chargeId=3）。耗时可能较长。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' },
-        { name: 'chargeId', type: 'integer', required: '必填', desc: 'Charge ID（也可用字段名 charge）', value: 6 }
+        { name: 'chargeId', type: 'integer', required: '必填', desc: 'Charge ID（仅允许 chargeId=2 或 chargeId=3；也可用字段名 charge）', value: 2 }
       ],
       response: { returnCode: 1, code: 0 }
     },
