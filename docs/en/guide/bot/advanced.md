@@ -372,7 +372,9 @@ Advanced query-bot commands and variants.
 
 | Command | Description |
 |---------|-------------|
-| `紫b50` / `13+b50` / `Master b50` etc. | Filter B50 by difficulty |
+| `紫b50` / `白b50` / `Master b50` etc. | Filter B50 by chart difficulty (`紫` = Master, `白` = Re:MASTER) |
+| `三星b50` / `四星b50` | Filter B50 by DX score stars (3-star / 4-star results) |
+| `3b50` / `4b50` / `13+b50` | Filter B50 by level/constant; numeric levels are separate from the star-count filters |
 | `紫ab50` etc. | Filter ab50 by difficulty |
 | `镜代b50` etc. | Filter by version era |
 | `l镜代b50` / `l爽代b35` etc. | Recalculate with past constants |
