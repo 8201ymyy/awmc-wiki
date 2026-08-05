@@ -72,7 +72,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
 | POST | `/v1/user/music` | 2 | All scores |
 | POST | `/v1/user/charge` | 1 | Owned Charges (read-only) |
 | GET | `/v1/charge/queue` | 0 | **Stub**: no real queue; empty `tasks` |
-| POST | `/v1/charge` | 10 | Buy one Charge (`charge` or `chargeId`) |
+| POST | `/v1/charge` | 10 | Buy one Charge (only `chargeId`/`charge` = **2 / 3 / 5**: 2x / 3x / 5x) |
 | POST | `/v1/update-lx` | 5 | LXNS sync (`key`+`qrcode`; ignore legacy `type`) |
 | POST | `/v1/update-fish` | 5 | Diving-Fish sync |
 
@@ -205,10 +205,10 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: 'Costs 10 Tokens. Maps to upsert-ticket; charge or chargeId (only chargeId=2 or chargeId=3). May be slow.',
+      description: 'Costs 10 Tokens. Maps to upsert-ticket; charge or chargeId (only 2/3/5: 2x / 3x / 5x). May be slow.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' },
-        { name: 'chargeId', type: 'integer', required: 'Required', desc: 'Charge ID (alias: charge; only 2 or 3)', value: 2 }
+        { name: 'chargeId', type: 'integer', required: 'Required', desc: 'Charge ID (alias: charge; only 2/3/5)', value: 2 }
       ],
       response: { returnCode: 1, code: 0 }
     },

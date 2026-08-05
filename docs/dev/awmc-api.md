@@ -74,7 +74,7 @@ apiBaseUrl: https://api.wmc.pub
 | POST | `/v1/user/music` | 2 | 全部成绩 |
 | POST | `/v1/user/charge` | 1 | 已持有 Charge（只读） |
 | GET | `/v1/charge/queue` | 0 | **占位**：上游已无真实队列，固定返回空 `tasks` |
-| POST | `/v1/charge` | 10 | 购买一张 Charge（`charge` 或 `chargeId`） |
+| POST | `/v1/charge` | 10 | 购买一张 Charge（仅允许 `chargeId`/`charge` = **2 / 3 / 5**：2倍票 / 3倍票 / 5倍票） |
 | POST | `/v1/update-lx` | 5 | 同步到落雪 LXNS（`key`+`qrcode`；旧字段 `type` 可忽略） |
 | POST | `/v1/update-fish` | 5 | 同步到 Diving-Fish（`token`+`qrcode`） |
 
@@ -94,7 +94,7 @@ apiBaseUrl: https://api.wmc.pub
 
 ### 充值 / 票券行为变更
 
-1. `POST /v1/charge` 不再「入队」，而是直接购买 Charge；Body 可用 `charge` 或 `chargeId`。
+1. `POST /v1/charge` 不再「入队」，而是直接购买 Charge；Body 可用 `charge` 或 `chargeId`，**仅允许 2 / 3 / 5**（2倍票 / 3倍票 / 5倍票），其它值返回 400。
 2. `GET /v1/charge/queue` 保留路径但**无真实任务**；请勿依赖队列状态轮询。
 3. 查询已持有票券请用 `POST /v1/user/charge`。
 
@@ -211,10 +211,10 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: '消耗 10 Token。映射 upsert-ticket；可用 charge 或 chargeId（仅允许 chargeId=2 或 chargeId=3）。耗时可能较长。',
+      description: '消耗 10 Token。映射 upsert-ticket；可用 charge 或 chargeId（仅允许 2/3/5：2倍票 / 3倍票 / 5倍票）。耗时可能较长。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' },
-        { name: 'chargeId', type: 'integer', required: '必填', desc: 'Charge ID（仅允许 chargeId=2 或 chargeId=3；也可用字段名 charge）', value: 2 }
+        { name: 'chargeId', type: 'integer', required: '必填', desc: 'Charge ID（仅允许 2/3/5：2倍票 / 3倍票 / 5倍票；也可用字段名 charge）', value: 2 }
       ],
       response: { returnCode: 1, code: 0 }
     },
