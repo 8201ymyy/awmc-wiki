@@ -132,7 +132,7 @@ SGWCMAID, official QR link, or QR image before the command is run again.
 
 ::: danger Untested item mutation
 `mai改道具` has not been tested on a real account and may cause irreversible data corruption,
-especially for `itemKind` 4, 8, or 15. The user must explicitly accept the risk before execution.
+especially for `itemKind` 4 or 8. The user must explicitly accept the risk before execution.
 The bulk `upsert-all` endpoint is not exposed as a Bot command.
 :::
 
