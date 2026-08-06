@@ -34,7 +34,7 @@ apiBaseUrl: https://api.wmc.pub
 以下操作**极可能对账号产生不可逆转的严重后果**，请勿随意调用：
 
 1. **改门**：`POST /v1/kaleidx-scope/upsert`（修改 Kaleidx Scope Gate 状态）。
-2. **未验证收藏品写入**：通过 `POST /v1/item/upsert` 或 `POST /v1/user/upsert-all` 发送 **`itemKind` 为 `4`、`8`、`15`** 的道具/钥匙类数据。
+2. **未验证收藏品写入**：通过 `POST /v1/item/upsert` 或 `POST /v1/user/upsert-all` 发送 **`itemKind` 为 `4`、`8`** 的道具数据。
 
 网关不会替你拦截这些请求；调用即视为自行承担风险。
 :::
@@ -369,10 +369,10 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/item/upsert',
       paramsIn: 'json',
-      description: '消耗 20 Token。【高风险】itemKind 为 4/8/15 时极可能对账号造成不可逆严重后果。',
+      description: '消耗 20 Token。【高风险】itemKind 为 4/8 时极可能对账号造成不可逆严重后果。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
-        { name: 'itemKind', type: 'integer', required: '必填', desc: '种类；避免未验证的 4/8/15', value: 2 },
+        { name: 'itemKind', type: 'integer', required: '必填', desc: '种类；避免未验证的 4/8', value: 2 },
         { name: 'itemId', type: 'integer', required: '必填', desc: '目标 ID', value: 11 },
         { name: 'operation', type: 'string', required: '必填', desc: 'add 或 del', value: 'add' }
       ],

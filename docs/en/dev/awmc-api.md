@@ -34,7 +34,7 @@ Redeem in the console or via `POST /redeem`.
 These actions **may cause irreversible, severe damage to an account**. Do not call them casually:
 
 1. **Gate edits**: `POST /v1/kaleidx-scope/upsert` (Kaleidx Scope Gate state).
-2. **Unverified collectibles**: writing **`itemKind` `4` / `8` / `15`** via `POST /v1/item/upsert` or `POST /v1/user/upsert-all`.
+2. **Unverified collectibles**: writing **`itemKind` `4` / `8`** via `POST /v1/item/upsert` or `POST /v1/user/upsert-all`.
 
 The gateway does **not** block these requests; you accept the risk by calling them.
 :::
@@ -337,10 +337,10 @@ More detail: [API Reference / Swagger](/en/dev/api-docs) → **Score → `/v1/mu
       method: 'POST',
       path: '/v1/item/upsert',
       paramsIn: 'json',
-      description: 'Costs 20 Tokens. HIGH RISK for itemKind 4/8/15.',
+      description: 'Costs 20 Tokens. HIGH RISK for itemKind 4/8.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
-        { name: 'itemKind', type: 'integer', required: 'Required', desc: 'Avoid unverified 4/8/15', value: 2 },
+        { name: 'itemKind', type: 'integer', required: 'Required', desc: 'Avoid unverified 4/8', value: 2 },
         { name: 'itemId', type: 'integer', required: 'Required', desc: 'Target ID', value: 11 },
         { name: 'operation', type: 'string', required: 'Required', desc: 'add or del', value: 'add' }
       ],
