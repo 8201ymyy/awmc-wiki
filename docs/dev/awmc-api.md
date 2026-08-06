@@ -69,12 +69,12 @@ apiBaseUrl: https://api.wmc.pub
 | 方法 | 路径 | 消耗 | 说明 |
 |------|------|------|------|
 | GET | `/v1/health` | 0 | 连通检查（映射 ping） |
-| POST | `/v1/user/data` | 1 | 用户基础数据 |
-| POST | `/v1/user/region` | 1 | 地区记录 |
-| POST | `/v1/user/music` | 2 | 全部成绩 |
-| POST | `/v1/user/charge` | 1 | 已持有 Charge（只读） |
+| POST | `/v1/user/data` | 2 | 用户基础数据 |
+| POST | `/v1/user/region` | 2 | 地区记录 |
+| POST | `/v1/user/music` | 4 | 全部成绩 |
+| POST | `/v1/user/charge` | 2 | 已持有 Charge（只读） |
 | GET | `/v1/charge/queue` | 0 | **占位**：上游已无真实队列，固定返回空 `tasks` |
-| POST | `/v1/charge` | 10 | 购买一张 Charge（仅允许 `chargeId`/`charge` = **2 / 3 / 5**：2倍票 / 3倍票 / 5倍票） |
+| POST | `/v1/charge` | 10 / 15 / 25 | 购买一张 Charge（`chargeId`/`charge` = **2 / 3 / 5** 时分别扣 **10 / 15 / 25** Token） |
 | POST | `/v1/update-lx` | 5 | 同步到落雪 LXNS（`key`+`qrcode`；旧字段 `type` 可忽略） |
 | POST | `/v1/update-fish` | 5 | 同步到 Diving-Fish（`token`+`qrcode`） |
 
@@ -83,18 +83,18 @@ apiBaseUrl: https://api.wmc.pub
 | 方法 | 路径 | 消耗 | 说明 |
 |------|------|------|------|
 | POST | `/v1/user/preview` | 1 | 用户预览 |
-| POST | `/v1/user/item-list` | 1 | 道具列表 |
-| POST | `/v1/user/kaleidx-scope` | 1 | 读取 Gate 状态 |
-| POST | `/v1/music/upsert` | 5 | 上传/覆盖 1–4 条成绩 |
-| POST | `/v1/music/delete` | 5 | 删除 1–4 条成绩 |
-| POST | `/v1/item/upsert` | 5 | 添加/删除道具（**高风险见上文**） |
+| POST | `/v1/user/item-list` | 2 | 道具列表 |
+| POST | `/v1/user/kaleidx-scope` | 2 | 读取 Gate 状态 |
+| POST | `/v1/music/upsert` | 15 | 上传/覆盖 1–4 条成绩 |
+| POST | `/v1/music/delete` | 10 | 删除 1–4 条成绩 |
+| POST | `/v1/item/upsert` | 20 | 添加/删除道具（**高风险见上文**） |
 | POST | `/v1/ticket/clear` | 5 | 清空 Charge |
-| POST | `/v1/kaleidx-scope/upsert` | 5 | 改门（**高风险见上文**） |
-| POST | `/v1/user/upsert-all` | 10 | 合并写入（**高风险见上文**） |
+| POST | `/v1/kaleidx-scope/upsert` | 30 | 改门（**高风险见上文**） |
+| POST | `/v1/user/upsert-all` | 25 | 合并写入（**高风险见上文**） |
 
 ### 充值 / 票券行为变更
 
-1. `POST /v1/charge` 不再「入队」，而是直接购买 Charge；Body 可用 `charge` 或 `chargeId`，**仅允许 2 / 3 / 5**（2倍票 / 3倍票 / 5倍票），其它值返回 400。
+1. `POST /v1/charge` 不再「入队」，而是直接购买 Charge；Body 可用 `charge` 或 `chargeId`，**仅允许 2 / 3 / 5**（2倍票 / 3倍票 / 5倍票），分别扣 **10 / 15 / 25** Token，其它值返回 400。
 2. `GET /v1/charge/queue` 保留路径但**无真实任务**；请勿依赖队列状态轮询。
 3. 查询已持有票券请用 `POST /v1/user/charge`。
 
@@ -127,7 +127,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/user/data',
       paramsIn: 'json',
-      description: '消耗 1 Token。成功 returnCode=1；msg / businessData 含业务 JSON。',
+      description: '消耗 2 Token。成功 returnCode=1；msg / businessData 含业务 JSON。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
@@ -149,7 +149,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/user/region',
       paramsIn: 'json',
-      description: '消耗 1 Token。',
+      description: '消耗 2 Token。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
@@ -160,7 +160,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/user/music',
       paramsIn: 'json',
-      description: '消耗 2 Token。响应体积较大。',
+      description: '消耗 4 Token。响应体积较大。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
@@ -171,7 +171,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/user/charge',
       paramsIn: 'json',
-      description: '消耗 1 Token。只读查询已持有票券，不是商店列表。',
+      description: '消耗 2 Token。只读查询已持有票券，不是商店列表。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
@@ -182,7 +182,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/user/item-list',
       paramsIn: 'json',
-      description: '消耗 1 Token。',
+      description: '消耗 2 Token。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
@@ -193,7 +193,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/user/kaleidx-scope',
       paramsIn: 'json',
-      description: '消耗 1 Token。只读；改门请见高风险接口。',
+      description: '消耗 2 Token。只读；改门请见高风险接口。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' }
       ],
@@ -211,7 +211,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: '消耗 10 Token。映射 upsert-ticket；可用 charge 或 chargeId（仅允许 2/3/5：2倍票 / 3倍票 / 5倍票）。耗时可能较长。',
+      description: '按 chargeId 扣费：2→10 / 3→15 / 5→25 Token。映射 upsert-ticket；可用 charge 或 chargeId（仅允许 2/3/5：2倍票 / 3倍票 / 5倍票）。耗时可能较长。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码内容', value: '' },
         { name: 'chargeId', type: 'integer', required: '必填', desc: 'Charge ID（仅允许 2/3/5：2倍票 / 3倍票 / 5倍票；也可用字段名 charge）', value: 2 }
@@ -238,7 +238,7 @@ apiBaseUrl: https://api.wmc.pub
 - Body 里带 `qrcode` + `musicList`（数组）。
 - `musicList` 长度 **1～4**：可以一次写多首歌，也可以同一首歌的多个难度。
 - 每一项用 **`(musicId, level)`** 唯一确定一条谱面成绩。
-- 消耗 **5 Token**；成功条件为上游 `returnCode === 1`。
+- 消耗 **15 Token**；成功条件为上游 `returnCode === 1`。
 
 #### `level`（难度）
 
@@ -311,7 +311,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/music/upsert',
       paramsIn: 'json',
-      description: '消耗 5 Token。fuzzy=false：dxScore 填实际 DX 分。一次 1～4 条。',
+      description: '消耗 15 Token。fuzzy=false：dxScore 填实际 DX 分。一次 1～4 条。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
         { name: 'musicList', type: 'array', required: '必填', desc: '成绩数组', value: [{ musicId: 11479, level: 3, achievement: 100.5, dxScore: 2100, comboStatus: 'ap', syncStatus: 'fsd', fuzzy: false }] }
@@ -335,7 +335,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/music/delete',
       paramsIn: 'json',
-      description: '消耗 5 Token。每项只能有 musicId + level。',
+      description: '消耗 10 Token。每项只能有 musicId + level。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
         { name: 'musicList', type: 'array', required: '必填', desc: '待删成绩', value: [{ musicId: 799, level: 4 }] }
@@ -354,7 +354,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/kaleidx-scope/upsert',
       paramsIn: 'json',
-      description: '消耗 5 Token。【高风险】改门极可能对账号造成不可逆严重后果。',
+      description: '消耗 30 Token。【高风险】改门极可能对账号造成不可逆严重后果。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
         { name: 'gateId', type: 'integer', required: '必填', desc: '门 ID', value: 7 },
@@ -367,7 +367,7 @@ apiBaseUrl: https://api.wmc.pub
       method: 'POST',
       path: '/v1/item/upsert',
       paramsIn: 'json',
-      description: '消耗 5 Token。【高风险】itemKind 为 4/8/15 时极可能对账号造成不可逆严重后果。',
+      description: '消耗 20 Token。【高风险】itemKind 为 4/8/15 时极可能对账号造成不可逆严重后果。',
       params: [
         { name: 'qrcode', type: 'string', required: '必填', desc: '二维码', value: '' },
         { name: 'itemKind', type: 'integer', required: '必填', desc: '种类；避免未验证的 4/8/15', value: 2 },

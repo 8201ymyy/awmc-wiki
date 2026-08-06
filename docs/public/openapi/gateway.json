@@ -66,7 +66,7 @@
           "User"
         ],
         "summary": "用户基础数据",
-        "description": "消耗 1 Token。映射 `/get-data`。",
+        "description": "消耗 2 Token。映射 `/get-data`。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -122,7 +122,7 @@
           "User"
         ],
         "summary": "用户地区记录",
-        "description": "消耗 1 Token。映射 `/get-region`。",
+        "description": "消耗 2 Token。映射 `/get-region`。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -150,7 +150,7 @@
           "User"
         ],
         "summary": "查询全部成绩",
-        "description": "消耗 2 Token。映射 `/get-music`。这是**读取**成绩，不是上传。上传请用 `/v1/music/upsert`。",
+        "description": "消耗 4 Token。映射 `/get-music`。这是**读取**成绩，不是上传。上传请用 `/v1/music/upsert`。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -178,7 +178,7 @@
           "User"
         ],
         "summary": "查询已持有 Charge",
-        "description": "消耗 1 Token。映射 `/get-ticket`。只读已持有票券，不是商店列表。",
+        "description": "消耗 2 Token。映射 `/get-ticket`。只读已持有票券，不是商店列表。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -206,7 +206,7 @@
           "User"
         ],
         "summary": "查询道具列表",
-        "description": "消耗 1 Token。映射 `/get-item-list`。",
+        "description": "消耗 2 Token。映射 `/get-item-list`。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -234,7 +234,7 @@
           "Kaleidx"
         ],
         "summary": "读取 Gate 状态",
-        "description": "消耗 1 Token。只读。改门请见高风险接口 `/v1/kaleidx-scope/upsert`。",
+        "description": "消耗 2 Token。只读。改门请见高风险接口 `/v1/kaleidx-scope/upsert`。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -262,7 +262,7 @@
           "Charge"
         ],
         "summary": "购买一张 Charge",
-        "description": "消耗 10 Token。映射 `/upsert-ticket`（不再入队）。字段可用 `charge` 或 `chargeId`（仅允许 2/3/5：2倍票 / 3倍票 / 5倍票）。耗时可能较长（上游约 60s 等待）。",
+        "description": "按 chargeId 扣费：2→10 / 3→15 / 5→25 Token。映射 `/upsert-ticket`（不再入队）。字段可用 `charge` 或 `chargeId`（仅允许 2/3/5：2倍票 / 3倍票 / 5倍票）。耗时可能较长（上游约 60s 等待）。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -354,7 +354,7 @@
           "Score"
         ],
         "summary": "上传 / 覆盖成绩（传歌曲）",
-        "description": "消耗 **5 Token**。映射上游 `/upsert-music`。\n\n## musicList 长什么样？（直接复制改）\n\n整个请求体就是：`qrcode` + **`musicList` 数组**（长度 1～4）。数组里每一项是一条成绩对象。\n\n### 精确模式（推荐先看这个）：`fuzzy=false`，`dxScore` = 实际 DX 分\n\n```json\n{\n  \"qrcode\": \"SGWCMAID...\",\n  \"musicList\": [\n    {\n      \"musicId\": 11479,\n      \"level\": 3,\n      \"achievement\": 100.5,\n      \"dxScore\": 2100,\n      \"comboStatus\": \"ap\",\n      \"syncStatus\": \"fsd\",\n      \"fuzzy\": false\n    }\n  ]\n}\n```\n\n### 一次传多条（最多 4 条）\n\n```json\n{\n  \"qrcode\": \"SGWCMAID...\",\n  \"musicList\": [\n    {\n      \"musicId\": 11479,\n      \"level\": 2,\n      \"achievement\": 100.5,\n      \"dxScore\": 2100,\n      \"comboStatus\": \"ap\",\n      \"syncStatus\": \"fsd\",\n      \"fuzzy\": false\n    },\n    {\n      \"musicId\": 11479,\n      \"level\": 3,\n      \"achievement\": 99.75,\n      \"dxScore\": 2400,\n      \"comboStatus\": \"fc\",\n      \"syncStatus\": \"fs\",\n      \"fuzzy\": false\n    },\n    {\n      \"musicId\": 11176,\n      \"level\": 2,\n      \"achievement\": 100.0,\n      \"dxScore\": 3,\n      \"comboStatus\": \"fcp\",\n      \"syncStatus\": \"fsp\",\n      \"fuzzy\": true\n    }\n  ]\n}\n```\n\n上面第 3 条是**模糊模式**：`fuzzy=true` 时 `dxScore: 3` 表示 DX **星级 3**（约 93% 完成度），**不是** DX 分等于 3。\n\n### 数组每一项的字段\n\n| 字段 | 必填 | 说明 |\n| --- | --- | --- |\n| `musicId` | 是 | 曲目 ID（当前版本真实存在的；别名 `music_id` / `id`） |\n| `level` | 是 | `0` BASIC · `1` ADV · `2` EXP · `3` MAS · `4` Re:MAS · `10` 宴会场 |\n| `achievement` | 是 | 达成率，如 `100.5`（别名 `acc`） |\n| `dxScore` | 是 | `fuzzy=false`→实际 DX 分；`fuzzy=true`→星级 0～5 |\n| `comboStatus` | 建议 | `none` / `fc` / `fcp` / `ap` / `app`（或 0～4） |\n| `syncStatus` | 建议 | `none` / `fs` / `fsp` / `fsd`|`fdx` / `fsdp`|`fdxp` / `sync`（或 0～5） |\n| `fuzzy` | 建议 | `false` 精确 · `true` 模糊 |\n\n不要传 `keychip`（网关注入）。`musicId` 填错会返回上游 `5004`。\n\n成功：`returnCode===1`（响应也会双写 `code===0`）。\n",
+        "description": "消耗 **15 Token**。映射上游 `/upsert-music`。\n\n## musicList 长什么样？（直接复制改）\n\n整个请求体就是：`qrcode` + **`musicList` 数组**（长度 1～4）。数组里每一项是一条成绩对象。\n\n### 精确模式（推荐先看这个）：`fuzzy=false`，`dxScore` = 实际 DX 分\n\n```json\n{\n  \"qrcode\": \"SGWCMAID...\",\n  \"musicList\": [\n    {\n      \"musicId\": 11479,\n      \"level\": 3,\n      \"achievement\": 100.5,\n      \"dxScore\": 2100,\n      \"comboStatus\": \"ap\",\n      \"syncStatus\": \"fsd\",\n      \"fuzzy\": false\n    }\n  ]\n}\n```\n\n### 一次传多条（最多 4 条）\n\n```json\n{\n  \"qrcode\": \"SGWCMAID...\",\n  \"musicList\": [\n    {\n      \"musicId\": 11479,\n      \"level\": 2,\n      \"achievement\": 100.5,\n      \"dxScore\": 2100,\n      \"comboStatus\": \"ap\",\n      \"syncStatus\": \"fsd\",\n      \"fuzzy\": false\n    },\n    {\n      \"musicId\": 11479,\n      \"level\": 3,\n      \"achievement\": 99.75,\n      \"dxScore\": 2400,\n      \"comboStatus\": \"fc\",\n      \"syncStatus\": \"fs\",\n      \"fuzzy\": false\n    },\n    {\n      \"musicId\": 11176,\n      \"level\": 2,\n      \"achievement\": 100.0,\n      \"dxScore\": 3,\n      \"comboStatus\": \"fcp\",\n      \"syncStatus\": \"fsp\",\n      \"fuzzy\": true\n    }\n  ]\n}\n```\n\n上面第 3 条是**模糊模式**：`fuzzy=true` 时 `dxScore: 3` 表示 DX **星级 3**（约 93% 完成度），**不是** DX 分等于 3。\n\n### 数组每一项的字段\n\n| 字段 | 必填 | 说明 |\n| --- | --- | --- |\n| `musicId` | 是 | 曲目 ID（当前版本真实存在的；别名 `music_id` / `id`） |\n| `level` | 是 | `0` BASIC · `1` ADV · `2` EXP · `3` MAS · `4` Re:MAS · `10` 宴会场 |\n| `achievement` | 是 | 达成率，如 `100.5`（别名 `acc`） |\n| `dxScore` | 是 | `fuzzy=false`→实际 DX 分；`fuzzy=true`→星级 0～5 |\n| `comboStatus` | 建议 | `none` / `fc` / `fcp` / `ap` / `app`（或 0～4） |\n| `syncStatus` | 建议 | `none` / `fs` / `fsp` / `fsd`|`fdx` / `fsdp`|`fdxp` / `sync`（或 0～5） |\n| `fuzzy` | 建议 | `false` 精确 · `true` 模糊 |\n\n不要传 `keychip`（网关注入）。`musicId` 填错会返回上游 `5004`。\n\n成功：`returnCode===1`（响应也会双写 `code===0`）。\n",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -469,7 +469,7 @@
           "Score"
         ],
         "summary": "删除成绩",
-        "description": "消耗 **5 Token**。映射 `/delete-music`。\n\n一次可删 **1～4** 条。每项**只能**包含 `musicId` + `level`（不要带达成率等字段）。账号上必须已有对应成绩，否则可能返回 `5005`。\n\n```json\n{\n  \"qrcode\": \"...\",\n  \"musicList\": [{ \"musicId\": 799, \"level\": 4 }]\n}\n```",
+        "description": "消耗 **10 Token**。映射 `/delete-music`。\n\n一次可删 **1～4** 条。每项**只能**包含 `musicId` + `level`（不要带达成率等字段）。账号上必须已有对应成绩，否则可能返回 `5005`。\n\n```json\n{\n  \"qrcode\": \"...\",\n  \"musicList\": [{ \"musicId\": 799, \"level\": 4 }]\n}\n```",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -504,7 +504,7 @@
           "Item"
         ],
         "summary": "添加或删除道具",
-        "description": "消耗 5 Token。映射 `/upsert-item`。\n\n**高风险**：`itemKind` 为 **4 / 8 / 15**（未充分验证的收藏品/钥匙类）时，极可能对账号造成不可逆严重后果，请勿随意发送。",
+        "description": "消耗 20 Token。映射 `/upsert-item`。\n\n**高风险**：`itemKind` 为 **4 / 8 / 15**（未充分验证的收藏品/钥匙类）时，极可能对账号造成不可逆严重后果，请勿随意发送。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -539,7 +539,7 @@
           "Item"
         ],
         "summary": "合并写入",
-        "description": "消耗 10 Token。映射 `/upsert-user-all`。可一次提交成绩、删成绩、道具、清票。\n\n**高风险**：`itemList` 含 `itemKind` 4/8/15 或涉及改门相关数据时，极可能对账号造成不可逆严重后果。",
+        "description": "消耗 25 Token。映射 `/upsert-user-all`。可一次提交成绩、删成绩、道具、清票。\n\n**高风险**：`itemList` 含 `itemKind` 4/8/15 或涉及改门相关数据时，极可能对账号造成不可逆严重后果。",
         "security": [
           {
             "AWMCGatewayToken": []
@@ -574,7 +574,7 @@
           "Kaleidx"
         ],
         "summary": "改门（高风险）",
-        "description": "消耗 5 Token。映射 `/upsert-kaleidx-scope`。\n\n**高风险：改门极可能对账号造成不可逆严重后果，请勿随意调用。**\n\n`gateId` 必填；`isGateFound` / `isKeyFound` / `isClear` 至少提供一项。",
+        "description": "消耗 30 Token。映射 `/upsert-kaleidx-scope`。\n\n**高风险：改门极可能对账号造成不可逆严重后果，请勿随意调用。**\n\n`gateId` 必填；`isGateFound` / `isKeyFound` / `isClear` 至少提供一项。",
         "security": [
           {
             "AWMCGatewayToken": []

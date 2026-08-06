@@ -67,12 +67,12 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
 | Method | Path | Cost | Notes |
 |--------|------|------|-------|
 | GET | `/v1/health` | 0 | Connectivity (ping) |
-| POST | `/v1/user/data` | 1 | User data |
-| POST | `/v1/user/region` | 1 | Region records |
-| POST | `/v1/user/music` | 2 | All scores |
-| POST | `/v1/user/charge` | 1 | Owned Charges (read-only) |
+| POST | `/v1/user/data` | 2 | User data |
+| POST | `/v1/user/region` | 2 | Region records |
+| POST | `/v1/user/music` | 4 | All scores |
+| POST | `/v1/user/charge` | 2 | Owned Charges (read-only) |
 | GET | `/v1/charge/queue` | 0 | **Stub**: no real queue; empty `tasks` |
-| POST | `/v1/charge` | 10 | Buy one Charge (only `chargeId`/`charge` = **2 / 3 / 5**: 2x / 3x / 5x) |
+| POST | `/v1/charge` | 10 / 15 / 25 | Buy one Charge (`chargeId`/`charge` = **2 / 3 / 5** → **10 / 15 / 25** Tokens) |
 | POST | `/v1/update-lx` | 5 | LXNS sync (`key`+`qrcode`; ignore legacy `type`) |
 | POST | `/v1/update-fish` | 5 | Diving-Fish sync |
 
@@ -81,18 +81,18 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
 | Method | Path | Cost | Notes |
 |--------|------|------|-------|
 | POST | `/v1/user/preview` | 1 | Preview |
-| POST | `/v1/user/item-list` | 1 | Items |
-| POST | `/v1/user/kaleidx-scope` | 1 | Read Gate state |
-| POST | `/v1/music/upsert` | 5 | Upsert 1–4 scores |
-| POST | `/v1/music/delete` | 5 | Delete 1–4 scores |
-| POST | `/v1/item/upsert` | 5 | Item write (**high risk**) |
+| POST | `/v1/user/item-list` | 2 | Items |
+| POST | `/v1/user/kaleidx-scope` | 2 | Read Gate state |
+| POST | `/v1/music/upsert` | 15 | Upsert 1–4 scores |
+| POST | `/v1/music/delete` | 10 | Delete 1–4 scores |
+| POST | `/v1/item/upsert` | 20 | Item write (**high risk**) |
 | POST | `/v1/ticket/clear` | 5 | Clear Charges |
-| POST | `/v1/kaleidx-scope/upsert` | 5 | Gate edit (**high risk**) |
-| POST | `/v1/user/upsert-all` | 10 | Combined write (**high risk**) |
+| POST | `/v1/kaleidx-scope/upsert` | 30 | Gate edit (**high risk**) |
+| POST | `/v1/user/upsert-all` | 25 | Combined write (**high risk**) |
 
 ### Charge / queue behavior change
 
-1. `POST /v1/charge` buys a Charge directly (not enqueue).
+1. `POST /v1/charge` buys a Charge directly (not enqueue); **10 / 15 / 25** Tokens for `chargeId` **2 / 3 / 5**.
 2. `GET /v1/charge/queue` remains but has **no real tasks**.
 3. Use `POST /v1/user/charge` to list owned tickets.
 
@@ -121,7 +121,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/user/data',
       paramsIn: 'json',
-      description: 'Costs 1 Token. returnCode=1 on success.',
+      description: 'Costs 2 Tokens. returnCode=1 on success.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
@@ -143,7 +143,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/user/region',
       paramsIn: 'json',
-      description: 'Costs 1 Token.',
+      description: 'Costs 2 Tokens.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
@@ -154,7 +154,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/user/music',
       paramsIn: 'json',
-      description: 'Costs 2 Tokens. Large response.',
+      description: 'Costs 4 Tokens. Large response.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
@@ -165,7 +165,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/user/charge',
       paramsIn: 'json',
-      description: 'Costs 1 Token. Read-only owned tickets, not the shop catalog.',
+      description: 'Costs 2 Tokens. Read-only owned tickets, not the shop catalog.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
@@ -176,7 +176,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/user/item-list',
       paramsIn: 'json',
-      description: 'Costs 1 Token.',
+      description: 'Costs 2 Tokens.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
@@ -187,7 +187,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/user/kaleidx-scope',
       paramsIn: 'json',
-      description: 'Costs 1 Token. Read-only.',
+      description: 'Costs 2 Tokens. Read-only.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' }
       ],
@@ -205,7 +205,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
       method: 'POST',
       path: '/v1/charge',
       paramsIn: 'json',
-      description: 'Costs 10 Tokens. Maps to upsert-ticket; charge or chargeId (only 2/3/5: 2x / 3x / 5x). May be slow.',
+      description: 'Costs 10 / 15 / 25 Tokens by chargeId (2 / 3 / 5). Maps to upsert-ticket; charge or chargeId. May be slow.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR text', value: '' },
         { name: 'chargeId', type: 'integer', required: 'Required', desc: 'Charge ID (alias: charge; only 2/3/5)', value: 2 }
@@ -231,7 +231,7 @@ Charged on **HTTP 2xx** and upstream business success. Suggest **180s** client t
 
 - Body: `qrcode` + `musicList` (array length **1–4**).
 - Each item is uniquely identified by **`(musicId, level)`**.
-- Costs **5 Tokens**; success when upstream `returnCode === 1`.
+- Costs **15 Tokens**; success when upstream `returnCode === 1`.
 
 #### `level`
 
@@ -281,7 +281,7 @@ More detail: [API Reference / Swagger](/en/dev/api-docs) → **Score → `/v1/mu
       method: 'POST',
       path: '/v1/music/upsert',
       paramsIn: 'json',
-      description: 'Costs 5 Tokens. fuzzy=false: dxScore is the real DX score. 1–4 items.',
+      description: 'Costs 15 Tokens. fuzzy=false: dxScore is the real DX score. 1–4 items.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
         { name: 'musicList', type: 'array', required: 'Required', desc: 'Scores', value: [{ musicId: 11479, level: 3, achievement: 100.5, dxScore: 2100, comboStatus: 'ap', syncStatus: 'fsd', fuzzy: false }] }
@@ -305,7 +305,7 @@ More detail: [API Reference / Swagger](/en/dev/api-docs) → **Score → `/v1/mu
       method: 'POST',
       path: '/v1/music/delete',
       paramsIn: 'json',
-      description: 'Costs 5 Tokens. Each item: musicId + level only.',
+      description: 'Costs 10 Tokens. Each item: musicId + level only.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
         { name: 'musicList', type: 'array', required: 'Required', desc: 'To delete', value: [{ musicId: 799, level: 4 }] }
@@ -324,7 +324,7 @@ More detail: [API Reference / Swagger](/en/dev/api-docs) → **Score → `/v1/mu
       method: 'POST',
       path: '/v1/kaleidx-scope/upsert',
       paramsIn: 'json',
-      description: 'Costs 5 Tokens. HIGH RISK: may irreversibly damage the account.',
+      description: 'Costs 30 Tokens. HIGH RISK: may irreversibly damage the account.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
         { name: 'gateId', type: 'integer', required: 'Required', desc: 'Gate ID', value: 7 },
@@ -337,7 +337,7 @@ More detail: [API Reference / Swagger](/en/dev/api-docs) → **Score → `/v1/mu
       method: 'POST',
       path: '/v1/item/upsert',
       paramsIn: 'json',
-      description: 'Costs 5 Tokens. HIGH RISK for itemKind 4/8/15.',
+      description: 'Costs 20 Tokens. HIGH RISK for itemKind 4/8/15.',
       params: [
         { name: 'qrcode', type: 'string', required: 'Required', desc: 'QR', value: '' },
         { name: 'itemKind', type: 'integer', required: 'Required', desc: 'Avoid unverified 4/8/15', value: 2 },
