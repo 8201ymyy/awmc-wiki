@@ -78,6 +78,8 @@ apiBaseUrl: https://api.wmc.pub
 | POST | `/v1/update-lx` | 5 | 同步到落雪 LXNS（`key`+`qrcode`；旧字段 `type` 可忽略） |
 | POST | `/v1/update-fish` | 5 | 同步到 Diving-Fish（`token`+`qrcode`） |
 
+配额分类中，`/v1/update-lx` 与 `/v1/update-fish` 属于**读取**（读取成绩并同步到外部服务）；其余 `upsert`、删除、清空和购票接口属于写入。详见[配额与限流](/dev/quota)。
+
 ### 2.2 新增路径
 
 | 方法 | 路径 | 消耗 | 说明 |

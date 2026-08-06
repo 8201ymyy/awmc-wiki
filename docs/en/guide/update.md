@@ -1,5 +1,21 @@
 # Changelog
 
+## August 2026
+
+### 2026/08/06
+AWMC Version `V26.8.14` [AWMC V2]
+
+<Badge type="tip" text="New Feature" />
+
+- **Extreme Two-Choice** — Added `舞萌极限二选一` / `极限二选一` / `二选一`, with `加入` / `参赛` for the five-round left/right song comparison; reveal images label Green Basic, Yellow Advanced, Red Expert, Purple Master, and White Re:MASTER explicitly.
+- **Letter Board modes** — Added `开字母文字模式`, `开字母图片模式`, and `开字母自动模式` for choosing text, image, or adaptive boards.
+
+<Badge type="warning" text="Optimization" />
+
+- **Game concurrency isolation** — Song, jacket, audio, chart, Guess Rating, Impostor, Extreme Two-Choice, and Letter Board games now share per-group session exclusion to prevent duplicate rounds and stale-round settlement.
+- **Rendering performance** — Image work uses a dedicated CPU executor with higher default parallelism, reducing render pressure on message handling.
+- **SW-API quota messaging** — `quota_exceeded` replies include personal read/write usage and the Beijing-time recovery timestamp; exhausted quota is no longer reported as an invalid QR code.
+
 ## July 2026
 
 ### 2026/07/28

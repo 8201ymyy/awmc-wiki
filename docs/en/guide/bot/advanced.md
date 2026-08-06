@@ -200,12 +200,19 @@ The rank course image includes LIFE rules, course track level/constant, personal
 | `重置猜rating` | Force-end the current Guess Rating round |
 | `找内鬼` / `找假卡` | Find the one card with an altered song RA among five B50 cards |
 | `重置找内鬼` | Force-end the current B50 Impostor round |
+| `舞萌极限二选一` / `极限二选一` / `二选一` | Join the five-round left/right comparison game; answer each round with `左` or `右` |
+| `加入` / `参赛` | Join the current Extreme Two-Choice round |
+| `重置二选一` | Force-end the current Extreme Two-Choice round |
 | `舞萌开字母` / `开字母` | Multi-song letter board (default 8 titles); timed settlement after full clear |
 | `开字母排行` / `开字母积分榜` | Group letter score board (image) |
 | `开字母贡献榜` | Group letter contribution board (image) |
 | `开字母时间榜` | Group best clear-time board (image, with avatars) |
+| `开字母文字模式` / `文字模式` | Use a plain-text board for the current or next Letter Board round |
+| `开字母图片模式` / `图片模式` | Use an image board for the current or next Letter Board round |
+| `开字母自动模式` / `自动模式` | Restore automatic Letter Board mode selection based on load and group size |
 | `查加倍卡` | View your multiplier cards |
 | `猜歌积分排行` | Total points leaderboard |
+| `本群猜歌排行` | View this group's guess participation and points ranking |
 | `猜歌积分日榜` / `周榜` / `月榜` / `年榜` / `赛季榜` | Period leaderboards |
 | `猜歌历史日榜` / `周榜` / `月榜` / `年榜` / `赛季榜` | Historical period boards |
 | `我的猜歌` / `猜歌数据` / `猜歌统计` | Personal seven-mode 30-day trend + points/count share donuts + adaptive mode cards & recent details; `我的猜歌 @user` for others |
@@ -267,6 +274,15 @@ Requires `开启mai猜歌`. Mutually exclusive with all other guessing modes and
 - The selected B50 owner cannot submit a valid answer or receive rewards.
 - First correct: 10 points + 2 BREAK; second: 6 points + 1 BREAK; third and later correct players: 3 points.
 - Settlement highlights the impostor and shows both the real and altered RA.
+:::
+
+::: tip Extreme Two-Choice
+Requires `开启mai猜歌`. Send `极限二选一` to start, then `加入` or `参赛` to join.
+
+- Five rounds compare a random metric for two songs; participants answer with `左` or `右`
+- Each round contributes to the final score; the reveal image shows the complete settlement
+- Chart labels are explicit: Green Basic, Yellow Advanced, Red Expert, Purple Master, White Re:MASTER
+- `重置二选一` can force-end the current round
 :::
 
 ### 2.7 Play Count (PC)
@@ -445,6 +461,13 @@ Must **enable data storage** first.
 | `群吃分榜` / `群寸止榜` / `群锁血榜` | Group leaderboards |
 | `开启mai猜歌` / `关闭mai猜歌` | **Group admin**: toggle guessing |
 | `开启别名推送` / `关闭别名推送` | **Group admin**: alias push |
+
+#### Admin rendering and precache status
+
+| Command | Description |
+|---------|-------------|
+| `猜歌预制状态` / `猜歌预制` / `预制状态` | **Admin**: inspect guess-audio/chart precache tasks |
+| `渲染状态` / `查询渲染` / `渲染任务` | **Admin**: inspect image and video rendering progress |
 
 #### Appendix: QQ Poke
 
