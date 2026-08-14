@@ -117,9 +117,7 @@ Gate status includes the names: 1 Blue Gate, 2 White Gate, 3 Purple Gate, 4 Blac
 |---------|-------------|
 | `mai改成绩` / `改分 [song difficulty achievement dxScore FC FS mode]` | Interactive or one-line score edit; 75 BREAK per successful item. |
 | `mai删成绩` / `删分 [song difficulty]` | Interactive or one-line score deletion; 50 BREAK per successful item. |
-| `mai清票` / `清票` | Clears all Charge tickets after confirmation; 10 BREAK on success. |
 | `mai改道具` / `改道具 [itemKind itemId add/del]` | Untested high-risk item mutation; 100 BREAK on success and always requires risk confirmation. |
-
 Score editing resolves song IDs, titles, and aliases. Interactive difficulty selection accepts
 `0 BASIC`, `1 ADVANCED`, `2 EXPERT`, `3 MASTER`, and `4 Re:MASTER`; songs without a Re:MASTER
 chart only accept `0-3`. Achievement accepts percentages such as
