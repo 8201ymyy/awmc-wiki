@@ -15,7 +15,8 @@ export default defineConfig({
         async: '', 
         defer: '', 
         src: 'https://s.awmc.cc/script.js', 
-        'data-website-id': '0f856a4e-ed22-4f01-9071-74c373477974' 
+        'data-website-id': '0f856a4e-ed22-4f01-9071-74c373477974',
+        'data-performance': 'true'
       }
     ],
     [
