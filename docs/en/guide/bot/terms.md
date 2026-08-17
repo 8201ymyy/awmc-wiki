@@ -8,6 +8,8 @@ Please read and fully understand this agreement before using the Service. If you
 
 By using the Service on QQ or related platforms, you are deemed to have read and agreed to all terms of this agreement.
 
+By using AWMCBOT and binding your data, you agree that we may store, process, or transfer your relevant data to the extent necessary to provide the Service. The specific data types, purposes, retention periods, and your rights are described in the sections below.
+
 If you do not agree, please stop using the Service immediately.
 
 
@@ -58,6 +60,8 @@ Used only for:
 
 * Feature implementation
 * Data display
+
+By using AWMCBOT and binding your data, you authorize us to store, process, or transfer the relevant data within the service scope described above.
 
 ### 4.2 Public Data and Training Use (Enabled by Default)
 
