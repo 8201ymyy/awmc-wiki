@@ -109,6 +109,7 @@ export default defineConfig({
               text: '🔧 AWMC API',
               items: [
                 {text: 'AWMC 功能 API', link: '/dev/awmc-api'},
+                {text: 'AWMCNET Bot API', link: '/dev/awmcnet-api'},
                 {text: '配额与限流', link: '/dev/quota'},
                 {text: 'Assets 静态资源 API', link: '/dev/assets-api'}
               ]

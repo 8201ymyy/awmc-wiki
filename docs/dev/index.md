@@ -32,6 +32,17 @@ chartPreviewBaseUrl: https://v.awmc.cc
 - **消耗规则**：HTTP 成功且上游业务成功时扣 Token（普通接口 `returnCode===1`，health/ping 为 `0`）。对外路径尽量兼容旧 `/v1/*`。
 - **详细文档**：[点击查看 AWMC 公共 API 详情](/dev/awmc-api)
 
+## 🗂️ AWMCNET Bot API (基准地址: `https://net.wmc.pub`)
+
+::: info 💡 成绩镜像与查询
+面向 QueryBot 和查分器的成绩同步接口，支持同一个 `snapshot_id` 分块提交全量快照，
+适合避免大成绩包一次性请求超时。
+:::
+
+- **鉴权方式**：<Badge type="warning" text="Bot-Token" />
+- **主要接口**：`POST /api/bot/sync`、`GET /api/bot/player/{qq}`
+- **详细文档**：[点击查看 AWMCNET Bot API 详情](/dev/awmcnet-api)
+
 ## 🖼️ Assets 静态资源 API (基准地址: `{{ $frontmatter.assetsApiBaseUrl }}`)
 
 ::: info 💡 静态资源
@@ -66,6 +77,7 @@ chartPreviewBaseUrl: https://v.awmc.cc
 
 - [**舞萌状态 API**](/dev/status-api) - 获取服务实时在线状态、心跳记录及公告。
 - [**AWMC 公共 API**](/dev/awmc-api) - 用户查询、发票充值队列、成绩上传（水鱼 / 落雪）。
+- [**AWMCNET Bot API**](/dev/awmcnet-api) - 成绩镜像、玩家查询与分块快照同步。
 - [**Assets 静态资源 API**](/dev/assets-api) - 曲绘、资源图库等静态文件获取。
 - [**谱面预览**](/dev/chart-preview) - 浏览器内谱面预览与 Query 参数说明。
 - [**谱面评价与分析 API**](/dev/chart-preview-api) - 谱面查询、评论、评分、成绩提交与排行榜 REST API。

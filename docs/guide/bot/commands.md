@@ -85,6 +85,13 @@ https://wq.wahlap.net/qrcode/req/MAID....html
 | `游玩排行50` | 全库游玩最多的 50 个谱面 |
 | `pc排行` | 所有已同步用户的 PC 总量排行 |
 
+::: tip 开发者：AWMCNET 分块同步
+QueryBot 或其他服务端将大量成绩同步到 AWMCNET 时，可以把全量快照拆成多个请求，
+每块设置 `full_snapshot: true` 并复用同一个 `snapshot_id`。中间块不设置
+`snapshot_final`，最后一块设置 `snapshot_final: true`；超时重试时继续使用同一个
+`snapshot_id`。完整字段和示例见 [AWMCNET Bot API](/dev/awmcnet-api)。
+:::
+
 ## 五、段位认定
 
 当前段位表默认使用国服现行版本 **PRiSM PLUS**。查询结果会生成图片，包含段位 LIFE 规则、4 首课题曲、乐曲难度/定数、个人最高达成率，以及服务器近期成绩聚合出的匿名样本统计。
