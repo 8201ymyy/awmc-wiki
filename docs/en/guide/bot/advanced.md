@@ -188,6 +188,10 @@ The rank course image includes LIFE rules, course track level/constant, personal
 
 ### 2.6 Song Guessing
 
+::: info Game triggers in private chat
+To play group games such as song guessing or chart guessing, follow the bot prompt to join the [AWMC official group](https://qm.qq.com/q/ZIJWblUc4E) before starting.
+:::
+
 | Command | Description |
 |---------|-------------|
 | `猜歌` | Text guessing |
